@@ -260,6 +260,13 @@ final class ExamRoomController extends BasePortal
         }
         $exam = $this->service->examFor($this->tenant->id(), (int) ($parameters['id'] ?? 0), $student['class_id'] !== null ? (int) $student['class_id'] : null)
             ?? throw HttpException::notFound('That exam is not available to you.');
+        if (\ExamCore\Models\SchoolExam::isPaper($exam)) {
+            // Paper exams are written in class; online students may only view their result.
+            $sitting = $this->sittings->forStudent((int) $exam['id'], (int) $student['id']);
+            if ($sitting === null || $sitting['status'] === 'in_progress') {
+                throw new HttpException(403, 'This exam is written on paper in class. Your result appears here after your teacher scans your answer sheet.');
+            }
+        }
         return [$student, $exam];
     }
 

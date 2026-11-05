@@ -14,7 +14,15 @@ final class SchoolExam extends Model
         // Exam security (M7)
         'proctoring' => 'off', 'snapshot_minutes' => 5, 'require_fullscreen' => false, 'single_device' => true,
         'ask_seat' => false, 'max_warnings' => 0, 'invigilator_pin' => '',
+        // Paper exams (M9)
+        'delivery' => 'cbt', 'versions' => 2, 'theory' => '', 'theory_max' => 0,
     ];
+    public const DELIVERY = ['cbt' => 'On computer or phone (CBT)', 'paper' => 'On paper (shading sheet, scanned by phone)'];
+
+    public static function isPaper(array $exam): bool
+    {
+        return ($exam['settings']['delivery'] ?? 'cbt') === 'paper';
+    }
     public const PROCTORING = [
         'off' => 'Off — no camera',
         'presence' => 'Camera: check a face is present (light, ~0.3 MB once)',
@@ -183,7 +191,7 @@ final class SchoolExam extends Model
     /** Exams a student can see: published, for their class, not yet past + recent past. @return list<array<string, mixed>> */
     public function forClass(int $schoolId, int $classId): array
     {
-        return $this->rows('SELECT e.id, e.title, e.type, e.starts_at, e.ends_at, e.duration_minutes, e.instructions,
+        return $this->rows('SELECT e.id, e.title, e.type, e.starts_at, e.ends_at, e.duration_minutes, e.instructions, e.settings,
                 (SELECT GROUP_CONCAT(p.subject ORDER BY p.position SEPARATOR \', \') FROM ' . $this->table('school_exam_papers') . ' p WHERE p.exam_id = e.id) AS subjects,
                 (SELECT SUM(p.question_count) FROM ' . $this->table('school_exam_papers') . ' p WHERE p.exam_id = e.id) AS question_total
             FROM ' . $this->table('school_exams') . ' e JOIN ' . $this->table('school_exam_classes') . ' ec ON ec.exam_id = e.id AND ec.class_id = ?

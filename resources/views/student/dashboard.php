@@ -41,7 +41,9 @@ $firstName = explode(' ', trim((string) ($student['name'] ?? $user['name'])))[0]
                         <p class="mt-0.5 text-xs text-subtle"><?= e(local_date($x['starts_at'], 'D j M, g:i a')) ?> – <?= e(local_date($x['ends_at'], 'g:i a')) ?></p>
                     </div>
                     <?php $sit = $sittings[(int) $x['id']] ?? null; $link = e(url('/student/exams/' . $x['id'])); ?>
-                    <?php if ($sit !== null && $sit['status'] !== 'in_progress'): ?><span class="badge badge-green">Submitted</span><a class="btn btn-secondary btn-sm" href="<?= $link ?>">View</a>
+                    <?php $isPaper = (json_decode((string) ($x['settings'] ?? ''), true)['delivery'] ?? 'cbt') === 'paper'; ?>
+                    <?php if ($isPaper && $sit === null): ?><span class="badge badge-gray"><?= icon('file-text', 'h-3.5 w-3.5') ?>Paper exam · written in class</span>
+                    <?php elseif ($sit !== null && $sit['status'] !== 'in_progress'): ?><span class="badge badge-green">Submitted</span><a class="btn btn-secondary btn-sm" href="<?= $link ?>">View</a>
                     <?php elseif ($live): ?><span class="badge badge-dot badge-green">Open now</span><a class="btn btn-primary btn-sm" href="<?= $link ?>"><?= $sit !== null ? 'Continue' : 'Start' ?></a>
                     <?php elseif ($over): ?><span class="badge badge-gray"><?= $sit === null ? 'Missed' : 'Closed' ?></span>
                     <?php else: ?><span class="badge badge-blue">Starts <?= e(time_until($start)) ?></span><a class="btn btn-secondary btn-sm" href="<?= e(url('/student/exams/' . $x['id'])) ?>">Details</a><?php endif; ?>

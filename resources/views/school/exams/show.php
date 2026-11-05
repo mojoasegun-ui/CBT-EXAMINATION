@@ -21,7 +21,8 @@ $act = static fn (string $action, string $label, string $class, string $confirm 
             <?= $act('cancel', 'Cancel exam', 'btn-danger-soft', 'Students will no longer see this exam.') ?>
         <?php endif; ?>
         <?php if (in_array($state, ['upcoming', 'live', 'closed'], true)): ?><a class="btn <?= $state === 'live' ? 'btn-primary' : 'btn-secondary' ?>" href="<?= e(url('/school/exams/' . $exam['id'] . '/monitor')) ?>"><?= icon('activity') ?><?= $state === 'closed' ? 'Scores & sittings' : 'Live monitor' ?></a><?php endif; ?>
-        <?php if (in_array($state, ['live', 'closed'], true)): ?><a class="btn btn-secondary" href="<?= e(url('/school/exams/' . $exam['id'] . '/results')) ?>"><?= icon('chart') ?>Results</a><?php endif; ?>
+        <?php if (SchoolExam::isPaper($exam) && $state !== 'cancelled'): ?><a class="btn btn-primary" href="<?= e(url('/school/exams/' . $exam['id'] . '/paper')) ?>"><?= icon('file-text') ?>Paper exam: print &amp; scan</a><?php endif; ?>
+        <?php if (in_array($state, ['live', 'closed'], true) || SchoolExam::isPaper($exam)): ?><a class="btn btn-secondary" href="<?= e(url('/school/exams/' . $exam['id'] . '/results')) ?>"><?= icon('chart') ?>Results</a><?php endif; ?>
         <?= $act('duplicate', 'Duplicate', 'btn-ghost') ?>
     </div>
 </div>

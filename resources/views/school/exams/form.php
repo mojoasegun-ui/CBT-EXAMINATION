@@ -71,6 +71,17 @@ $action = $exam['id'] ? url('/school/exams/' . $exam['id']) : url('/school/exams
             </div>
         </section>
         <section class="card card-body space-y-3 text-sm">
+            <p class="label flex items-center gap-2"><?= icon('file-text', 'h-4 w-4 text-brand') ?>How students write it</p>
+            <?php $pv = static fn (string $k) => $old[$k] ?? $exam['settings'][$k]; ?>
+            <?= field('delivery', 'Delivery', (string) $pv('delivery'), [], ['type' => 'select', 'options' => SchoolExam::DELIVERY]) ?>
+            <div class="grid grid-cols-2 gap-3">
+                <?= field('versions', 'Paper versions', (string) $pv('versions'), [], ['type' => 'select', 'options' => ['1' => 'A only', '2' => 'A and B', '3' => 'A, B, C', '4' => 'A, B, C, D']]) ?>
+                <?= field('theory_max', 'Theory marks', (string) $pv('theory_max'), $errors, ['type' => 'number', 'hint' => '0 = objectives only', 'attrs' => ' min="0" max="100"']) ?>
+            </div>
+            <?= field('theory', 'Theory questions (paper only)', (string) $pv('theory'), [], ['type' => 'textarea', 'hint' => 'one question per paragraph; leave a blank line between questions', 'attrs' => ' rows="4"']) ?>
+            <p class="text-xs text-muted">Paper exams: print the question paper and one shading sheet per student, then scan the sheets with a phone. Versions A/B have the same questions in a different order so neighbours cannot copy.</p>
+        </section>
+        <section class="card card-body space-y-3 text-sm">
             <p class="label flex items-center gap-2"><?= icon('shield', 'h-4 w-4 text-brand') ?>Exam security</p>
             <?php $sv = static fn (string $k) => $old[$k] ?? $exam['settings'][$k]; ?>
             <?= field('proctoring', 'Camera check', (string) $sv('proctoring'), [], ['type' => 'select', 'options' => SchoolExam::PROCTORING]) ?>

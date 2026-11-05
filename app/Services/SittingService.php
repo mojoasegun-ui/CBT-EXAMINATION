@@ -211,14 +211,7 @@ final class SittingService
             if ($sitting['status'] !== 'in_progress') {
                 return [$sitting, false];
             }
-            $papers = $this->sittings->grade($sittingId);
-            $total = array_sum(array_column($papers, 'total'));
-            $correct = array_sum(array_column($papers, 'correct'));
-            $data = [
-                'status' => $auto ? 'auto_submitted' : 'submitted', 'submitted_at' => gmdate('Y-m-d H:i:s'),
-                'score' => $correct, 'percent' => $total > 0 ? round($correct * 100 / $total, 2) : 0,
-                'answered_count' => array_sum(array_column($papers, 'answered')), 'breakdown' => json_encode($papers),
-            ];
+            $data = ['status' => $auto ? 'auto_submitted' : 'submitted', 'submitted_at' => gmdate('Y-m-d H:i:s')] + $this->marks($sitting);
             $this->sittings->finish($sittingId, $data);
             return [array_merge($sitting, $data), true];
         });
@@ -227,6 +220,43 @@ final class SittingService
             $this->queue !== null ? $this->queue->push(self::JOB_STATS, ['sitting_id' => $sittingId]) : $this->sittings->recordQuestionStats($sittingId);
         }
         return $sitting;
+    }
+
+    /**
+     * Score, percent and per-subject breakdown. A theory score (paper exams, one subject)
+     * is added to that subject: objectives correct + theory, out of objectives + theory max.
+     */
+    private function marks(array $sitting): array
+    {
+        $papers = $this->sittings->grade((int) $sitting['id']);
+        $correct = array_sum(array_column($papers, 'correct'));
+        $theoryMax = (int) ($sitting['theory_max'] ?? 0);
+        $theory = $sitting['theory_score'] !== null && $theoryMax > 0 ? min((float) $sitting['theory_score'], $theoryMax) : null;
+        if ($theory !== null && $papers !== []) {
+            $papers[0]['objective_total'] = $papers[0]['total'];
+            $papers[0]['objective_correct'] = $papers[0]['correct'];
+            $papers[0]['total'] += $theoryMax;
+            $papers[0]['correct'] += $theory;
+            $papers[0]['theory'] = $theory;
+            $papers[0]['theory_max'] = $theoryMax;
+        }
+        $total = array_sum(array_column($papers, 'total'));
+        $earned = array_sum(array_column($papers, 'correct'));
+        return [
+            'score' => $correct, 'percent' => $total > 0 ? round($earned * 100 / $total, 2) : 0,
+            'answered_count' => array_sum(array_map(static fn ($p) => $p['answered'], $papers)), 'breakdown' => json_encode($papers),
+        ];
+    }
+
+    /** Re-mark a finished sitting (e.g. after a theory score is entered). */
+    public function regrade(int $sittingId): array
+    {
+        return $this->database->transaction(function () use ($sittingId): array {
+            $sitting = $this->sittings->lock($sittingId) ?? throw new HttpException(404, 'Sitting not found.');
+            $data = $this->marks($sitting);
+            $this->sittings->finish($sittingId, $data);
+            return array_merge($sitting, $data);
+        });
     }
 
     public function expireOverdue(int $limit): int

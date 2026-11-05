@@ -223,7 +223,22 @@ final class ExamController extends SchoolController
             'require_fullscreen' => isset($in['require_fullscreen']), 'single_device' => isset($in['single_device']), 'ask_seat' => isset($in['ask_seat']),
             'max_warnings' => max(0, min(50, (int) ($in['max_warnings'] ?? 0))),
             'invigilator_pin' => mb_substr(preg_replace('/\D/', '', (string) ($in['invigilator_pin'] ?? '')) ?? '', 0, 8),
+            'delivery' => ($in['delivery'] ?? '') === 'paper' ? 'paper' : 'cbt',
+            'versions' => max(1, min(4, (int) ($in['versions'] ?? 2))),
+            'theory' => mb_substr(trim(str_replace("\r", '', (string) ($in['theory'] ?? ''))), 0, 6000),
+            'theory_max' => max(0, min(100, (int) ($in['theory_max'] ?? 0))),
         ];
+        if ($settings['delivery'] === 'paper') {
+            if (array_sum(array_column($papers, 'question_count')) > 100) {
+                $errors['papers'] = 'A shading sheet holds at most 100 objective questions in total.';
+            }
+            if ($settings['theory_max'] > 0 && count($papers) > 1) {
+                $errors['theory_max'] = 'Theory marks are only supported when the paper has one subject.';
+            }
+            if ($errors !== []) {
+                return $this->backWithErrors($id === null ? '/school/exams/create' : '/school/exams/' . $id . '/edit', $errors, $in);
+            }
+        }
         $id = $this->exams->save($this->schoolId(), $id, (int) $this->guard->id(), [
             'term_id' => $current['term']['id'] ?? null, 'title' => $title, 'type' => array_key_exists($in['type'] ?? '', SchoolExam::TYPES) ? $in['type'] : 'test',
             'starts_at' => $starts, 'ends_at' => $ends, 'duration_minutes' => $duration, 'instructions' => mb_substr(trim((string) ($in['instructions'] ?? '')), 0, 3000) ?: null, 'settings' => $settings,

@@ -307,3 +307,33 @@ html:not(.js) .reveal { opacity: 1; transform: none; }
     .flyer { break-inside: avoid; }
     .flyer-a4 .flyer { min-height: 277mm; }
 }
+
+/* ---- Paper exams: question paper and OMR sheets ------------------------------------------------ */
+@layer components {
+    .omr-sheet { @apply mx-auto mb-6 block bg-white shadow-xl; max-width: 100%; height: auto; }
+    .qp { @apply mx-auto mb-8 bg-white p-[14mm] text-[12.5px] leading-[1.55] text-slate-900 shadow-xl; max-width: 210mm; }
+    .qp-head { @apply flex items-center gap-4 border-b-2 border-slate-900 pb-3; }
+    .qp-school { @apply font-display text-[18px] font-bold uppercase tracking-wide; }
+    .qp-title { @apply text-[14px] font-semibold; }
+    .qp-meta { @apply text-[11.5px] text-slate-600; }
+    .qp-version { @apply grid h-16 w-16 shrink-0 place-items-center rounded-lg border-2 border-slate-900 font-display text-[28px] font-bold leading-none; }
+    .qp-version span { @apply block text-[8px] font-bold tracking-[.2em]; }
+    .qp-instructions { @apply mt-3 space-y-1 rounded-md border border-slate-300 bg-slate-50 p-3 text-[11.5px]; }
+    .qp-section { @apply mb-2 mt-4 border-b border-slate-400 pb-1 text-[12px] font-bold uppercase tracking-[.12em]; }
+    .qp-objectives { columns: 2; column-gap: 9mm; column-rule: 1px solid #e2e8f0; }
+    .qp-q { @apply mb-3; break-inside: avoid; }
+    .qp-n { @apply font-bold; }
+    .qp-options { @apply mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5 pl-4; }
+    .qp-img { @apply my-1.5 max-h-40 max-w-full; }
+    .qp-subject { @apply mb-2 mt-1 rounded bg-slate-800 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-white; break-after: avoid; column-span: none; }
+    .qp-passage { @apply mb-3 rounded border border-slate-300 p-2 text-[11.5px]; break-inside: avoid; }
+    .qp-theory { @apply space-y-4; }
+    .qp-theory li { @apply flex gap-2; break-inside: avoid; }
+    .qp-end { @apply mt-6 text-center text-[11px] font-semibold text-slate-500; }
+}
+@media print {
+    .omr-sheet { box-shadow: none; margin: 0; width: 210mm; height: 297mm; page-break-after: always; }
+    .qp { box-shadow: none; margin: 0; padding: 0; max-width: none; page-break-after: always; page: qp; }
+    .qp-break { break-before: page; }
+}
+@page qp { size: A4; margin: 12mm 12mm 16mm; @bottom-center { content: "Page " counter(page) " of " counter(pages); font: 10px Arial, sans-serif; color: #555; } }
