@@ -8,9 +8,9 @@ $fmt = static fn ($v): string => rtrim(rtrim(number_format((float) $v, 1), '0'),
 <div class="slips-page">
 <?php foreach ($rows as $r): ?>
     <article class="slip">
-        <header class="flex items-center gap-3 border-b border-slate-300 pb-3">
+        <header class="slip-head flex items-center gap-3 pb-3">
             <?php if (!empty($school['logo_path'])): ?><img src="<?= e(url('/' . $school['logo_path'])) ?>" alt="" class="h-11 w-11 object-contain"><?php endif; ?>
-            <div class="flex-1"><p class="font-display text-[15px] font-bold uppercase leading-tight"><?= e($school['name']) ?></p><p class="text-[11px] text-slate-600">Result slip · <?= e($exam['title']) ?></p></div>
+            <div class="flex-1"><p class="slip-school font-display text-[15px] font-bold uppercase leading-tight"><?= e($school['name']) ?></p><p class="text-[11px] text-slate-600">Result slip · <?= e($exam['title']) ?></p></div>
             <img src="<?= e($r['qr']) ?>" alt="QR code to verify this slip" class="h-[72px] w-[72px]">
         </header>
         <div class="mt-3 grid grid-cols-[1fr_auto] gap-4">
@@ -23,7 +23,7 @@ $fmt = static fn ($v): string => rtrim(rtrim(number_format((float) $v, 1), '0'),
                     <div class="col-span-2 mt-1"><dt class="rc-label">Subjects</dt><dd class="text-[12px]"><?= e(implode(' · ', array_map(static fn ($s, $v) => $s . ' ' . rtrim(rtrim(number_format($v, 1), '0'), '.') . '%', array_keys($r['papers']), $r['papers']))) ?></dd></div>
                 <?php endif; ?>
             </dl>
-            <div class="rounded-xl border-2 border-slate-800 px-5 py-2 text-center">
+            <div class="slip-score rounded-xl px-5 py-2 text-center">
                 <p class="rc-label">Score</p>
                 <p class="font-display text-[26px] font-bold leading-none"><?= $fmt($r['percent']) ?>%</p>
                 <p class="mt-1 text-[12px] font-semibold"><?= (int) $r['score'] ?>/<?= (int) $r['question_count'] ?> · <?= e($r['grade']['grade']) ?></p>

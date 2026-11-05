@@ -9,13 +9,13 @@ $showPos = !empty($set['show_position']);
 $caW = (int) $set['ca_weight'];
 ?>
 <article class="a4">
-    <header class="flex items-center gap-4 border-b-2 border-slate-800 pb-4">
+    <header class="rc-head flex items-center gap-4 pb-4">
         <?php if (!empty($sc['logo_path'])): ?><img src="<?= e(url('/' . $sc['logo_path'])) ?>" alt="" class="h-16 w-16 object-contain"><?php endif; ?>
         <div class="flex-1 text-center">
-            <p class="font-display text-[20px] font-bold uppercase leading-tight tracking-wide"><?= e($sc['name']) ?></p>
+            <p class="rc-school font-display text-[20px] font-bold uppercase leading-tight tracking-wide"><?= e($sc['name']) ?></p>
             <?php if (!empty($sc['motto'])): ?><p class="text-[11px] italic text-slate-600">“<?= e($sc['motto']) ?>”</p><?php endif; ?>
             <p class="text-[11px] text-slate-600"><?= e(trim(($sc['address'] ?? '') . ' ' . ($sc['phone'] ?? ''))) ?></p>
-            <p class="mt-1.5 inline-block rounded bg-slate-800 px-3 py-0.5 text-[11px] font-bold uppercase tracking-[.2em] text-white">Report sheet · <?= e($tm['name']) ?> · <?= e($tm['session_name']) ?></p>
+            <p class="rc-pill mt-1.5 inline-block rounded px-3 py-0.5 text-[11px] font-bold uppercase tracking-[.2em]">Report sheet · <?= e($tm['name']) ?> · <?= e($tm['session_name']) ?></p>
         </div>
         <img src="<?= e($card['qr']) ?>" alt="QR code to verify this report" class="h-20 w-20">
     </header>

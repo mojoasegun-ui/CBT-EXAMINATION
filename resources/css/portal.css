@@ -337,3 +337,25 @@ html:not(.js) .reveal { opacity: 1; transform: none; }
     .qp-break { break-before: page; }
 }
 @page qp { size: A4; margin: 12mm 12mm 16mm; @bottom-center { content: "Page " counter(page) " of " counter(pages); font: 10px Arial, sans-serif; color: #555; } }
+
+/* ---- School colour on PRINTED documents ------------------------------------------------------------
+ * The app stays platform blue. Report cards, result slips, question papers and flyers carry the school's
+ * own colour via --school (set by layouts/print.php; platform blue when the school has none).
+ * OMR answer sheets deliberately stay pure black/white so the phone scanner reads them reliably. */
+:root { --school: 30 64 175; --school-ink: 255 255 255; --school-text: 30 64 175; }
+.rc-head { border-bottom: 2px solid rgb(var(--school)); }
+.rc-school, .slip-school, .qp-school { color: rgb(var(--school-text)); }
+.rc-pill { background: rgb(var(--school)); color: rgb(var(--school-ink)); }
+.rc-table th { background: rgb(var(--school) / .10); color: rgb(var(--school-text)); border-color: rgb(var(--school) / .35); }
+.rc-table td { border-color: rgb(var(--school) / .25); }
+.slip { border-top: 4px solid rgb(var(--school)); }
+.slip-head { border-bottom: 1px solid rgb(var(--school) / .35); }
+.slip-score { border: 2px solid rgb(var(--school)); }
+.qp-head { border-bottom-color: rgb(var(--school)); }
+.qp-version { border-color: rgb(var(--school)); color: rgb(var(--school-text)); }
+.qp-section { border-bottom-color: rgb(var(--school)); color: rgb(var(--school-text)); }
+.flyer { border-color: rgb(var(--school) / .35); }
+.flyer-band { background: rgb(var(--school)); }
+.flyer-brand { color: rgb(var(--school-text)); }
+.flyer-steps span { background: rgb(var(--school)); color: rgb(var(--school-ink)); }
+.rc-pill, .rc-table th, .slip, .slip-score, .flyer-band, .flyer-steps span { -webkit-print-color-adjust: exact; print-color-adjust: exact; }

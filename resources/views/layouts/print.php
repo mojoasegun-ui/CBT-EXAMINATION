@@ -4,11 +4,15 @@ declare(strict_types=1);
 $school ??= null;
 $brandColor = null; // one platform colour for every role
 $back ??= null;
+// Printed documents carry the school's colour; the app itself stays platform blue. Platform blue when no valid colour.
+$schoolHex = (string) ($school['primary_color'] ?? '');
+$schoolHex = preg_match('/^#[0-9a-fA-F]{6}$/', $schoolHex) ? $schoolHex : '#1E40AF';
 ?>
 <!doctype html>
 <html lang="en">
 <head>
     <?php require __DIR__ . '/../partials/portal/head.php'; ?>
+    <style nonce="<?= e($cspNonce) ?>">:root{--school:<?= e(hex_to_rgb_channels($schoolHex)) ?>;--school-ink:<?= e(brand_ink($schoolHex)) ?>;--school-text:<?= e(brand_readable($schoolHex)) ?>}</style>
 </head>
 <body class="print-shell min-h-screen bg-soft">
 <?php require __DIR__ . '/../partials/portal/toasts.php'; ?>

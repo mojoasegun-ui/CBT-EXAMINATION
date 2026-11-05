@@ -153,7 +153,7 @@ if (!function_exists('initials')) {
 
 if (!function_exists('hex_to_rgb_channels')) {
     /** "#4F46E5" → "79 70 229", for the --brand CSS variable. */
-    function hex_to_rgb_channels(?string $hex, string $fallback = '79 70 229'): string
+    function hex_to_rgb_channels(?string $hex, string $fallback = '30 64 175'): string
     {
         if (!is_string($hex) || !preg_match('/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i', $hex, $m)) {
             return $fallback;
@@ -167,7 +167,7 @@ if (!function_exists('brand_tint')) {
     function brand_tint(?string $hex, float $amount = 0.38): string
     {
         if (!is_string($hex) || !preg_match('/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i', $hex, $m)) {
-            return '168 85 247';
+            return '59 130 246';
         }
         $mix = static fn (string $pair): int => (int) round(hexdec($pair) + (255 - hexdec($pair)) * $amount);
         return $mix($m[1]) . ' ' . $mix($m[2]) . ' ' . $mix($m[3]);
@@ -187,5 +187,24 @@ if (!function_exists('brand_ink')) {
         };
         $l = 0.2126 * $channel(substr($hex, 1, 2)) + 0.7152 * $channel(substr($hex, 3, 2)) + 0.0722 * $channel(substr($hex, 5, 2));
         return (1.05 / ($l + 0.05)) >= (($l + 0.05) / 0.05) ? '255 255 255' : '15 23 42';
+    }
+}
+
+if (!function_exists('brand_readable')) {
+    /** The colour darkened just enough to be readable as TEXT on white (contrast ≥ 4.5), as "R G B" channels. */
+    function brand_readable(?string $hex): string
+    {
+        if (!is_string($hex) || !preg_match('/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i', $hex, $m)) {
+            return '30 64 175';
+        }
+        $rgb = [hexdec($m[1]), hexdec($m[2]), hexdec($m[3])];
+        $lum = static function (array $c): float {
+            $l = array_map(static fn (int $v): float => ($v / 255) <= 0.03928 ? ($v / 255) / 12.92 : (($v / 255 + 0.055) / 1.055) ** 2.4, $c);
+            return 0.2126 * $l[0] + 0.7152 * $l[1] + 0.0722 * $l[2];
+        };
+        for ($i = 0; $i < 40 && 1.05 / ($lum($rgb) + 0.05) < 4.5; $i++) {
+            $rgb = array_map(static fn (int $v): int => (int) floor($v * 0.9), $rgb);
+        }
+        return implode(' ', $rgb);
     }
 }
