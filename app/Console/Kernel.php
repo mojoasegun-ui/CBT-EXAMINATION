@@ -36,6 +36,7 @@ final class Kernel
             'key:generate' => ['Create APP_KEY and SETUP_TOKEN in .env if missing (never overwrites)', fn (array $o): int => $this->generateKeys()],
             'bank:seed-starter' => ['Load the original starter questions into the platform bank and public practice sets', fn (array $o): int => $this->seedStarter()],
             'bank:seed-syllabus' => ['Load the syllabus-based practice questions (database/seeds/syllabus) into the platform bank; safe to re-run', fn (array $o): int => $this->seedSyllabus()],
+            'bank:build-sets' => ['Build year-named public practice sets (2005-2026) from the bank. --board=jamb|waec|neco --subject="Biology" --from=2005 --to=2026', fn (array $o): int => $this->buildSets($o)],
             'owner:create' => ['Create an Owner Console account. --name="Ada Obi" --email=you@x.ng [--password=...]', fn (array $o): int => $this->createOwner($o)],
         ];
     }
@@ -216,6 +217,124 @@ final class Kernel
         }
         $this->line("Added {$total} question(s)" . ($skipped ? ", skipped {$skipped} invalid" : '') . '.');
         return 0;
+    }
+
+    /**
+     * Public practice series for the free home page: one set per board × subject × year label. The questions are
+     * ORIGINAL syllabus-based bank questions (never real past papers); the year is only the series label.
+     * Stable and idempotent: the same board/subject/year always picks the same questions, existing sets are kept.
+     *
+     * @param array<string,string> $o
+     */
+    private function buildSets(array $o): int
+    {
+        $pdo = $this->container->get(Database::class)->connection();
+        $boards = ['jamb' => ['JAMB', 40, 0.75], 'waec' => ['WAEC', 50, 1.2], 'neco' => ['NECO', 50, 1.2]];
+        $only = strtolower($o['board'] ?? '');
+        $from = max(2005, (int) ($o['from'] ?? 2005));
+        $to = min(2026, (int) ($o['to'] ?? 2026));
+        $typeIds = $pdo->query('SELECT slug, id FROM cbt_exam_types')->fetchAll(\PDO::FETCH_KEY_PAIR);
+
+        // Retire the first-generation starter sets (their year was just the creation year); delete when nobody has attempted them.
+        $pdo->exec("UPDATE cbt_exams SET is_active = 0 WHERE title LIKE 'WAEC-style % Practice Set 1'");
+        $pdo->exec("DELETE q FROM cbt_questions q JOIN cbt_exams e ON e.id = q.exam_id WHERE e.title LIKE 'WAEC-style % Practice Set 1' AND NOT EXISTS (SELECT 1 FROM cbt_attempts a WHERE a.exam_id = e.id)");
+        $pdo->exec("DELETE e FROM cbt_exams e WHERE e.title LIKE 'WAEC-style % Practice Set 1' AND NOT EXISTS (SELECT 1 FROM cbt_attempts a WHERE a.exam_id = e.id)");
+
+        $subjects = $pdo->query("SELECT DISTINCT subject FROM cbt_bank_questions WHERE school_id IS NULL AND status = 'published' AND passage_id IS NULL AND image_path IS NULL")->fetchAll(\PDO::FETCH_COLUMN);
+        $findSubject = $pdo->prepare('SELECT id FROM cbt_subjects WHERE LOWER(name) = LOWER(?) LIMIT 1');
+        $newSubject = $pdo->prepare('INSERT INTO cbt_subjects (slug, name, icon, is_active) VALUES (?, ?, ?, 1)');
+        $exists = $pdo->prepare('SELECT 1 FROM cbt_exams WHERE exam_type_id = ? AND subject_id = ? AND year = ? LIMIT 1');
+        $addExam = $pdo->prepare('INSERT INTO cbt_exams (exam_type_id, subject_id, year, title, duration_minutes, total_questions, is_active) VALUES (?, ?, ?, ?, ?, ?, 1)');
+        $addQuestion = $pdo->prepare('INSERT INTO cbt_questions (exam_id, question_text, option_a, option_b, option_c, option_d, correct_option, explanation, marks, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)');
+        $made = 0;
+
+        foreach ($subjects as $subject) {
+            $pool = $pdo->prepare("SELECT id, topic, body, option_a, option_b, option_c, option_d, correct_option, explanation FROM cbt_bank_questions WHERE school_id IS NULL AND status = 'published' AND passage_id IS NULL AND image_path IS NULL AND subject = ? ORDER BY id");
+            $pool->execute([$subject]);
+            $rows = $pool->fetchAll(\PDO::FETCH_ASSOC);
+            if (count($rows) < 15) {
+                continue;
+            }
+            $findSubject->execute([$subject]);
+            $subjectId = (int) $findSubject->fetchColumn();
+            if ($subjectId === 0) {
+                $slug = trim((string) preg_replace('/[^a-z0-9]+/', '-', strtolower($subject)), '-');
+                $newSubject->execute([$slug, $subject, 'chart']);
+                $subjectId = (int) $pdo->lastInsertId();
+            }
+            foreach ($boards as $key => [$label, $base, $perQuestion]) {
+                if ($only !== '' && $only !== $key) {
+                    continue;
+                }
+                $size = (int) min($base, max(15, floor(count($rows) * 0.6)));
+                $minutes = max(10, (int) ceil($size * $perQuestion));
+                for ($year = $from; $year <= $to; $year++) {
+                    $title = "{$label}-style {$subject} Practice Series {$year}";
+                    $exists->execute([$typeIds[$key], $subjectId, $year]);
+                    if ($exists->fetchColumn()) {
+                        continue;
+                    }
+                    $picked = self::pickSet($rows, $size, crc32("{$key}|{$subject}|{$year}"));
+                    $pdo->beginTransaction();
+                    $addExam->execute([$typeIds[$key], $subjectId, $year, $title, $minutes, count($picked)]);
+                    $examId = (int) $pdo->lastInsertId();
+                    foreach ($picked as $n => $q) {
+                        $addQuestion->execute([$examId, $q['body'], $q['option_a'], $q['option_b'], $q['option_c'], $q['option_d'], $q['correct_option'], $q['explanation'], $n + 1]);
+                    }
+                    $pdo->commit();
+                    $made++;
+                }
+                $this->line(sprintf('  %-5s %-26s %d questions per set', $label, $subject, $size));
+            }
+        }
+        $this->line("Built {$made} new practice set(s).");
+        return 0;
+    }
+
+    /**
+     * Topic-balanced, seeded pick: shuffle each topic and the topic order, then deal round-robin.
+     *
+     * @param list<array<string,mixed>> $rows
+     * @return list<array<string,mixed>>
+     */
+    private static function pickSet(array $rows, int $size, int $seed): array
+    {
+        mt_srand($seed);
+        $byTopic = [];
+        foreach ($rows as $r) {
+            $byTopic[(string) $r['topic']][] = $r;
+        }
+        ksort($byTopic);
+        foreach ($byTopic as &$list) {
+            for ($i = count($list) - 1; $i > 0; $i--) {
+                $j = mt_rand(0, $i);
+                [$list[$i], $list[$j]] = [$list[$j], $list[$i]];
+            }
+        }
+        unset($list);
+        $topics = array_keys($byTopic);
+        for ($i = count($topics) - 1; $i > 0; $i--) {
+            $j = mt_rand(0, $i);
+            [$topics[$i], $topics[$j]] = [$topics[$j], $topics[$i]];
+        }
+        $out = [];
+        while (count($out) < $size) {
+            $progress = false;
+            foreach ($topics as $t) {
+                if ($byTopic[$t] !== [] && count($out) < $size) {
+                    $out[] = array_pop($byTopic[$t]);
+                    $progress = true;
+                }
+            }
+            if (!$progress) {
+                break;
+            }
+        }
+        for ($i = count($out) - 1; $i > 0; $i--) {
+            $j = mt_rand(0, $i);
+            [$out[$i], $out[$j]] = [$out[$j], $out[$i]];
+        }
+        return $out;
     }
 
     private function seedStarter(): int

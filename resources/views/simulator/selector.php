@@ -203,6 +203,7 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
                             <div class="mt-5 rounded-xl bg-slate-50 p-4" aria-live="polite">
                                 <p class="font-semibold text-ink" data-exam-meta>Choose a set to see its format.</p>
                                 <p class="mt-1 text-sm text-muted" data-exam-description>Available practice sets show their question count and time limit here.</p>
+                                <p class="mt-3 border-t border-slate-200 pt-3 text-xs leading-5 text-slate-500">Each year is a practice series of original questions written to the exam syllabus. They are not the real past papers; the year is only a label to help you keep track.</p>
                             </div>
                         </fieldset>
                     </div>
@@ -250,7 +251,7 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
             <ol class="how-grid motion-stagger mt-10 grid gap-5 md:grid-cols-3">
                 <li class="how-card motion-reveal rounded-3xl border border-slate-200 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.08)]" data-reveal>
                     <svg class="h-16 w-16 text-primary" viewBox="0 0 64 64" role="img" aria-label="Select exam illustration"><rect x="7" y="10" width="50" height="44" rx="9" fill="#dbeafe"/><rect x="15" y="18" width="34" height="7" rx="3.5" fill="#1e40af"/><circle cx="21" cy="36" r="5" fill="#f59e0b"/><path d="M32 36h12M16 46h32" stroke="#64748b" stroke-width="3" stroke-linecap="round"/></svg>
-                    <span class="mt-5 block text-xs font-extrabold uppercase tracking-widest text-primary">Step 01</span><h3 class="mt-2 font-display text-xl font-bold">Choose a set</h3><p class="mt-2 text-sm leading-6 text-muted">Pick an exam type, a subject, and an available year curated from real school-exam formats.</p>
+                    <span class="mt-5 block text-xs font-extrabold uppercase tracking-widest text-primary">Step 01</span><h3 class="mt-2 font-display text-xl font-bold">Choose a set</h3><p class="mt-2 text-sm leading-6 text-muted">Pick an exam type, a subject, and a year. Every series uses original questions written to the exam syllabus.</p>
                 </li>
                 <li class="how-card motion-reveal rounded-3xl border border-slate-200 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.08)]" data-reveal>
                     <svg class="h-16 w-16 text-primary" viewBox="0 0 64 64" role="img" aria-label="Answer practice question illustration"><rect x="5" y="10" width="54" height="42" rx="8" fill="#dbeafe"/><path d="M13 19h25M13 27h38" stroke="#64748b" stroke-width="3" stroke-linecap="round"/><circle cx="18" cy="38" r="5" fill="#1e40af"/><path d="M29 38h20" stroke="#64748b" stroke-width="3" stroke-linecap="round"/><path d="M24 55h16" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/></svg>

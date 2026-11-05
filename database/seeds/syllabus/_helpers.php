@@ -67,3 +67,36 @@ if (!function_exists('qfmt')) {
         return [$topic, $difficulty, $body, $options[0], $options[1], $options[2], $options[3], chr(65 + $pos), $explanation];
     }
 }
+
+if (!function_exists('pairq')) {
+    /**
+     * Recall questions from (left, right) pairs, in both directions. Wrong options are other pairs' answers, so
+     * keep every right-hand side distinct and unambiguous.
+     *
+     * @param list<array{0:string,1:string}> 
+     * @return list<array<int, string>>
+     */
+    function pairq(string $topic, string $difficulty, string $stemLR, ?string $stemRL, array $pairs, string $why = '%1$s: %2$s.'): array
+    {
+        static $seed = 5000;
+        $rows = [];
+        $n = count($pairs);
+        $pick = static function (array $pairs, int $i, int $side, string $right) use ($n): array {
+            $out = [];
+            foreach ([1, 5, 11, 17, 23, 29, 31, 37] as $step) {
+                $cand = $pairs[($i + $step) % $n][$side];
+                if ($cand !== $right && !in_array($cand, $out, true)) {
+                    $out[] = $cand;
+                }
+            }
+            return $out;
+        };
+        foreach ($pairs as $i => [$l, $r]) {
+            $rows[] = mc($topic, $difficulty, sprintf($stemLR, $l), $r, $pick($pairs, $i, 1, $r), sprintf($why, $l, $r), $seed++);
+            if ($stemRL !== null) {
+                $rows[] = mc($topic, $difficulty, sprintf($stemRL, $r), $l, $pick($pairs, $i, 0, $l), sprintf($why, $l, $r), $seed++);
+            }
+        }
+        return $rows;
+    }
+}

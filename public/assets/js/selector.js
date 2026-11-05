@@ -270,7 +270,7 @@
             if (!response.ok) throw new Error(payload.error || "Practice exams could not be loaded.");
             examChoice.replaceChildren(new Option(payload.exams.length ? "Choose a year" : "No practice set available", ""));
             payload.exams.forEach((exam) => {
-                const option = new Option(`${exam.year} · ${exam.title}`, String(exam.id));
+                const option = new Option(`${exam.year} practice series · ${exam.total_questions} questions`, String(exam.id));
                 option.dataset.questions = String(exam.total_questions);
                 option.dataset.duration = String(exam.duration_minutes);
                 option.dataset.title = exam.title;
