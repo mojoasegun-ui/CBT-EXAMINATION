@@ -19,7 +19,7 @@ $flagJson = json_encode(array_map('intval', $flaggedQuestions ?? []), JSON_HEX_T
 <html lang="en">
 <head>
     <?php require __DIR__ . '/../partials/pwa-tags.php'; ?>
-    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
     <meta name="csrf-token" content="<?= e($csrfToken) ?>"><meta name="theme-color" content="#1e40af">
     <title><?= e($attempt['title']) ?> | <?= e($appName) ?></title>
     <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>"><script defer src="<?= e(asset('js/simulator.js')) ?>"></script>

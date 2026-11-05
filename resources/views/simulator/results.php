@@ -31,7 +31,7 @@ $scoreTone = $passed ? 'Excellent performance' : ($percent >= 35 ? 'Close to the
 <head>
     <?php require __DIR__ . '/../partials/pwa-tags.php'; ?>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
     <meta name="theme-color" content="#1E40AF">
     <meta name="description" content="CBT exam results dashboard with detailed review and score breakdown.">
     <title>Practice results | <?= e($appName) ?></title>

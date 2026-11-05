@@ -32,7 +32,7 @@ $caW = (int) $set['ca_weight'];
         <?php if (!empty($st['photo_path'])): ?><img src="<?= e(url('/' . $st['photo_path'])) ?>" alt="" class="h-24 w-20 rounded border border-slate-300 object-cover"><?php endif; ?>
     </section>
 
-    <table class="rc-table mt-4">
+    <div class="mt-4 overflow-x-auto rc-scroll"><table class="rc-table">
         <thead><tr><th>Subject</th><th class="w-14 text-center">CA <?= $caW ?>%</th><th class="w-14 text-center">Exam <?= 100 - $caW ?>%</th><th class="w-14 text-center">Total</th><th class="w-12 text-center">Grade</th><?php if ($showPos): ?><th class="w-14 text-center">Position</th><?php endif; ?><th class="w-16 text-center">Class avg</th><th>Remark</th></tr></thead>
         <tbody>
             <?php foreach ($sheet['subjects'] as $sub): $m = $row['subjects'][$sub] ?? null; ?>
@@ -49,7 +49,7 @@ $caW = (int) $set['ca_weight'];
             <?php endforeach; ?>
             <?php if ($sheet['subjects'] === []): ?><tr><td colspan="8" class="py-6 text-center text-slate-500">No released results for this term yet.</td></tr><?php endif; ?>
         </tbody>
-    </table>
+    </table></div>
 
     <section class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div class="rounded-lg border border-slate-300 p-2.5 text-center"><p class="rc-label">Subjects</p><p class="text-lg font-bold"><?= (int) ($row['count'] ?? 0) ?></p></div>

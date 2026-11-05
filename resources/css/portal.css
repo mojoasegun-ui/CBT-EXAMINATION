@@ -134,8 +134,8 @@
     .nav-link[aria-current="page"]::before { content: ""; @apply absolute -left-3 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-signature; }
 
     /* Tabs (pill style) */
-    .tabs { @apply flex gap-1 overflow-x-auto rounded-full border border-line bg-soft p-1; scrollbar-width: none; }
-    .tab { @apply whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold text-muted transition hover:text-ink; }
+    .tabs { @apply flex max-w-full gap-1 overflow-x-auto rounded-full border border-line bg-soft p-1; scrollbar-width: none; }
+    .tab { @apply shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold text-muted transition hover:text-ink; }
     .tab[aria-current="page"] { @apply bg-card text-ink; box-shadow: 0 1px 2px rgb(var(--shadow-tint) / .08), 0 4px 10px -4px rgb(var(--shadow-tint) / .1); }
 
     /* Misc */
@@ -359,3 +359,17 @@ html:not(.js) .reveal { opacity: 1; transform: none; }
 .flyer-brand { color: rgb(var(--school-text)); }
 .flyer-steps span { background: rgb(var(--school)); color: rgb(var(--school-ink)); }
 .rc-pill, .rc-table th, .slip, .slip-score, .flyer-band, .flyer-steps span { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+/* ---- Fit the screen, always ------------------------------------------------------------------------
+ * In the installed app there is no browser chrome to scroll sideways, so one over-wide element makes the whole
+ * page wider than the phone and people have to pinch it smaller. Never allow horizontal page scroll; wide tables
+ * and tab rows scroll inside their own box. Pinch-zoom IN stays allowed (accessibility). */
+html { overflow-x: hidden; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { min-width: 0; }
+img, svg, video, canvas { max-width: 100%; }
+
+/* Report card on a phone: smaller page padding, table scrolls inside its box (paper output is unchanged). */
+@media screen and (max-width: 640px) {
+    .a4 { padding: 14px; min-height: 0; }
+    .rc-scroll { -webkit-overflow-scrolling: touch; }
+}

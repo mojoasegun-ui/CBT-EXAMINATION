@@ -8,7 +8,7 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
 <head>
     <?php require __DIR__ . '/../partials/pwa-tags.php'; ?>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
     <meta name="csrf-token" content="<?= e($csrfToken) ?>">
     <meta name="theme-color" content="#1E40AF">
     <meta name="description" content="Practice WAEC, NECO and JAMB questions with a free anonymous CBT simulator.">
@@ -19,12 +19,12 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
 <body class="min-h-screen bg-slate-50 text-ink antialiased">
 <a href="#main-content" class="skip-link">Skip to content</a>
 <header class="site-header sticky top-0 z-40 border-b border-white/60 bg-white/90 shadow-sm backdrop-blur">
-    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <a href="<?= e($homeUrl) ?>" class="brand inline-flex min-h-11 items-center gap-3 rounded-xl font-display text-lg font-extrabold text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600" aria-label="ExamCore CBT practice home">
-            <svg class="h-9 w-9" viewBox="0 0 40 40" role="img" aria-label=""><path d="M5 8.5 20 2l15 6.5v13c0 8.4-6.1 13.2-15 16C11.1 34.7 5 29.9 5 21.5v-13Z" fill="#1E40AF"/><path d="M13 13h14M13 19h14M13 25h8" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="2.5"/></svg>
+    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-3 sm:px-6 lg:px-8">
+        <a href="<?= e($homeUrl) ?>" class="brand inline-flex min-h-11 min-w-0 shrink items-center gap-2 rounded-xl font-display text-base font-extrabold sm:gap-3 sm:text-lg text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600" aria-label="ExamCore CBT practice home">
+            <svg class="h-8 w-8 shrink-0 sm:h-9 sm:w-9" viewBox="0 0 40 40" role="img" aria-label=""><path d="M5 8.5 20 2l15 6.5v13c0 8.4-6.1 13.2-15 16C11.1 34.7 5 29.9 5 21.5v-13Z" fill="#1E40AF"/><path d="M13 13h14M13 19h14M13 25h8" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="2.5"/></svg>
             <span>ExamCore <span class="font-medium text-primary">CBT</span></span>
         </a>
-        <div class="flex items-center gap-2 sm:gap-3">
+        <div class="flex shrink-0 items-center gap-1.5 sm:gap-3">
             <button type="button" class="theme-toggle" aria-label="Toggle dark mode" data-theme-toggle>
                 <span class="theme-toggle__icon" aria-hidden="true">☀️</span>
             </button>

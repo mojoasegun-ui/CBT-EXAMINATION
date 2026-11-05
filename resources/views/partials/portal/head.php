@@ -4,7 +4,7 @@ declare(strict_types=1);
 $brandColor ??= null;
 ?>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="csrf-token" content="<?= e($csrfToken) ?>">
 <meta name="theme-color" content="#1E40AF">

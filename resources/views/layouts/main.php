@@ -8,7 +8,7 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
 <head>
     <?php require __DIR__ . '/../partials/pwa-tags.php'; ?>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
     <meta name="csrf-token" content="<?= e($csrfToken ?? '') ?>">
     <meta name="description" content="A modular computer-based testing platform foundation for schools and institutions.">
     <meta name="theme-color" content="#1E40AF">

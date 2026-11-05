@@ -30,3 +30,6 @@
 		}
 	}
 }
+/* Fit the screen, always: no sideways page scroll (installed app has no browser chrome to fix it). */
+html { overflow-x: hidden; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { min-width: 0; }

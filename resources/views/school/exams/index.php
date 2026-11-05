@@ -8,7 +8,7 @@ $tabs = ['live' => 'Live now', 'upcoming' => 'Upcoming', 'draft' => 'Drafts', 'p
         <p class="mt-1 text-sm text-muted">Build exams from your question bank, choose classes and a time window, then publish.</p></div>
     <a href="<?= e(url('/school/exams/create')) ?>" class="btn btn-primary"><?= icon('plus') ?>New exam</a>
 </div>
-<nav class="tabs mt-6 w-fit" aria-label="Exam status">
+<nav class="tabs mt-6 max-w-full" aria-label="Exam status">
     <?php foreach ($tabs as $key => $label): ?>
         <a class="tab inline-flex items-center gap-2" href="<?= e(url('/school/exams?tab=' . $key)) ?>" <?= $tab === $key ? 'aria-current="page"' : '' ?>>
             <?php if ($key === 'live' && $counts['live'] > 0): ?><span class="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></span><?php endif; ?><?= e($label) ?>

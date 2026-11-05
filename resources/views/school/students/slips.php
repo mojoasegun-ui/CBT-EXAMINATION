@@ -7,7 +7,7 @@ $host = preg_replace('#^https?://#', '', $loginUrl);
 <html lang="en" data-theme="light">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
     <meta name="robots" content="noindex">
     <title>Sign-in slips · <?= e($school['name']) ?></title>
     <link rel="stylesheet" href="<?= e(asset('css/portal.css')) ?>">
