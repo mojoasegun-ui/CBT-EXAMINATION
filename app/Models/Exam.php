@@ -56,7 +56,7 @@ final class Exam extends Model
     {
         $limit = max(1, min(20, $limit));
         $statement = $this->connection()->prepare(
-            'SELECT a.id AS attempt_id, a.status, a.score, a.total, a.started_at, e.id AS exam_id, e.title, e.exam_type_id, e.subject_id
+            'SELECT a.id AS attempt_id, a.status, a.score, a.total, a.started_at, a.student_name, a.student_email, e.id AS exam_id, e.title, e.exam_type_id, e.subject_id
              FROM ' . $this->table('attempts') . ' a
              INNER JOIN ' . $this->table('exams') . ' e ON e.id = a.exam_id
              WHERE a.session_token = :session_token ORDER BY a.started_at DESC LIMIT ' . $limit

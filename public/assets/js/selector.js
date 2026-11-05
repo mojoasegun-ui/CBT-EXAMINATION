@@ -391,11 +391,51 @@
         examChoice.value = examId;
     });
 
+    // The short animation that plays before an exam opens, then the form is submitted.
+    const launchLayer = document.querySelector("[data-launch]");
+    let launching = false;
+    const launchExam = () => {
+        if (launching) return;
+        launching = true;
+        if (!launchLayer || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            form.requestSubmit();
+            return;
+        }
+        const first = (studentNameHiddenInput?.value || "").trim().split(/\s+/)[0];
+        const hello = launchLayer.querySelector("[data-launch-hello]");
+        if (hello) hello.textContent = first ? `Good luck, ${first}!` : "Good luck!";
+        launchLayer.hidden = false;
+        launchLayer.classList.add("is-on");
+        document.body.classList.add("menu-open");
+        const steps = [...launchLayer.querySelectorAll("[data-step]")];
+        steps.forEach((li, i) => window.setTimeout(() => li.classList.add("is-done"), 450 + i * 550));
+        window.setTimeout(() => form.requestSubmit(), 450 + steps.length * 550 + 150);
+    };
+    window.addEventListener("pageshow", (event) => {
+        if (event.persisted && launchLayer) {
+            launching = false;
+            launchLayer.hidden = true;
+            launchLayer.classList.remove("is-on");
+            launchLayer.querySelectorAll("[data-step]").forEach((li) => li.classList.remove("is-done"));
+            document.body.classList.remove("menu-open");
+        }
+    });
+    const profileKnown = () => {
+        syncStudentProfile();
+        const name = (studentNameHiddenInput?.value || "").trim();
+        const email = (studentEmailHiddenInput?.value || "").trim();
+        return name.length >= 2 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    };
+
     openIdentityButtons.forEach((button) => {
         button.addEventListener("click", (event) => {
             event.preventDefault();
             if (!hasSelection()) {
                 setStatus("Choose a practice set before continuing.");
+                return;
+            }
+            if (profileKnown()) {
+                launchExam(); // details already known: no pop-up
                 return;
             }
             syncStudentProfile();
@@ -414,7 +454,10 @@
         });
     };
     try {
-        const saved = JSON.parse(localStorage.getItem(PROFILE_KEY) || "null");
+        let saved = JSON.parse(localStorage.getItem(PROFILE_KEY) || "null");
+        if ((!saved || !saved.name) && form.dataset.knownName) {
+            saved = { name: form.dataset.knownName, email: form.dataset.knownEmail || "" };
+        }
         if (saved && saved.name) {
             if (identityName) identityName.value = saved.name;
             if (identityEmail) identityEmail.value = saved.email || "";
@@ -462,7 +505,7 @@
         }
         closeIdentityModal();
         syncStudentProfile();
-        form.requestSubmit();
+        launchExam();
     });
 
     form.addEventListener("submit", (event) => {
@@ -570,4 +613,69 @@
             }
         });
     }
+
+    // ---- Lively touches: rotating exam name, count-up numbers, pointer parallax, button ripple ----
+    const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const word = document.querySelector("[data-rotate]");
+    if (word && !calm) {
+        const words = word.dataset.rotate.split("|");
+        let at = 0;
+        window.setInterval(() => {
+            word.classList.add("is-out");
+            window.setTimeout(() => {
+                at = (at + 1) % words.length;
+                word.textContent = words[at];
+                word.classList.remove("is-out");
+            }, 260);
+        }, 2200);
+    }
+    const counters = [...document.querySelectorAll("[data-count]")];
+    if (counters.length && "IntersectionObserver" in window && !calm) {
+        const run = (el) => {
+            const end = Number(el.dataset.count);
+            const suffix = el.dataset.suffix || "";
+            const t0 = performance.now();
+            const tick = (now) => {
+                const k = Math.min(1, (now - t0) / 1400);
+                const v = Math.round(end * (1 - Math.pow(1 - k, 3)));
+                el.textContent = v.toLocaleString("en-US") + (k === 1 ? suffix : "");
+                if (k < 1) requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        };
+        const seen = new IntersectionObserver((entries) => entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                run(entry.target);
+                seen.unobserve(entry.target);
+            }
+        }), { threshold: 0.6 });
+        counters.forEach((el) => seen.observe(el));
+    }
+    const hero = document.querySelector("#hero-title")?.closest("section");
+    const parallax = hero ? [...hero.querySelectorAll("[data-parallax], .hero-chip, .hero-aurora")] : [];
+    if (hero && parallax.length && !calm && window.matchMedia("(pointer: fine)").matches) {
+        let frame = 0;
+        hero.addEventListener("pointermove", (event) => {
+            if (frame) return;
+            frame = requestAnimationFrame(() => {
+                frame = 0;
+                const r = hero.getBoundingClientRect();
+                const x = (event.clientX - r.left) / r.width - 0.5;
+                const y = (event.clientY - r.top) / r.height - 0.5;
+                hero.style.setProperty("--px", x.toFixed(3));
+                hero.style.setProperty("--py", y.toFixed(3));
+            });
+        });
+    }
+    document.addEventListener("pointerdown", (event) => {
+        const target = event.target instanceof Element ? event.target.closest(".cta-shine, .btn-ripple, [data-start-button]") : null;
+        if (!target || calm) return;
+        const r = target.getBoundingClientRect();
+        const dot = document.createElement("span");
+        dot.className = "ripple-dot";
+        dot.style.left = `${event.clientX - r.left}px`;
+        dot.style.top = `${event.clientY - r.top}px`;
+        target.append(dot);
+        window.setTimeout(() => dot.remove(), 650);
+    });
 })();

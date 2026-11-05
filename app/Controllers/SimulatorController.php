@@ -50,8 +50,17 @@ final class SimulatorController extends Controller
             return $attempt;
         }, $this->examModel->listRecentForSession($sessionToken, 5));
         $errorCode = $request->query('error');
+        // Details this browser already gave on an earlier attempt, so nobody retypes them (the page also remembers them locally).
+        $known = null;
+        foreach ($recent as $attempt) {
+            if (trim((string) ($attempt['student_name'] ?? '')) !== '' && trim((string) ($attempt['student_email'] ?? '')) !== '') {
+                $known = ['name' => (string) $attempt['student_name'], 'email' => (string) $attempt['student_email']];
+                break;
+            }
+        }
 
         return $this->render('simulator/selector', [
+            'knownProfile' => $known,
             'appName' => $this->service('config')['app']['name'],
             'baseUrl' => $this->baseUrl(),
             'csrfToken' => $this->csrf->token(),

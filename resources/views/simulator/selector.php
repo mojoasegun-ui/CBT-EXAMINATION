@@ -64,21 +64,22 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
 <main id="main-content" tabindex="-1">
     <?php $heroPhoto = is_file(dirname(__DIR__, 3) . '/public/assets/images/hero-student.jpg'); ?>
     <section class="relative isolate overflow-hidden bg-gradient-to-br from-blue-900 via-primary to-blue-700 text-white" aria-labelledby="hero-title">
-        <?php if ($heroPhoto): ?><img src="<?= e($assetRoot) ?>/images/hero-student.jpg" alt="" class="absolute inset-y-0 right-0 -z-10 h-full w-full object-cover object-right opacity-60 sm:w-3/5" fetchpriority="high"><div class="absolute inset-0 -z-10 bg-gradient-to-r from-blue-950 via-blue-900/85 to-transparent" aria-hidden="true"></div><?php endif; ?>
-        <div class="absolute -right-24 -top-24 -z-10 h-80 w-80 rounded-full bg-blue-400/20 blur-3xl" aria-hidden="true"></div>
-        <div class="absolute -bottom-32 left-1/3 -z-10 h-72 w-72 rounded-full bg-amber-400/15 blur-3xl" aria-hidden="true"></div>
+        <?php if ($heroPhoto): ?><img src="<?= e($assetRoot) ?>/images/hero-student.jpg" alt="" class="hero-photo absolute inset-y-0 right-0 -z-10 h-full w-full object-cover object-right opacity-60 sm:w-3/5" fetchpriority="high"><div class="absolute inset-0 -z-10 bg-gradient-to-r from-blue-950 via-blue-900/85 to-transparent" aria-hidden="true"></div><?php endif; ?>
+        <div class="hero-aurora -z-10" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="hero-grid -z-10" aria-hidden="true"></div>
+        <div class="hero-bits -z-10" aria-hidden="true"><b>A</b><b>B</b><b>C</b><b>D</b><b>✓</b><b>?</b><b>+</b><b>%</b></div>
         <div class="mx-auto grid max-w-7xl items-center gap-6 px-4 pb-24 pt-9 sm:px-6 sm:pt-14 lg:grid-cols-[1.15fr_.85fr] lg:px-8 lg:pb-28 lg:pt-16">
             <div class="motion-reveal" data-reveal>
                 <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-blue-50 backdrop-blur sm:text-sm"><span class="h-2 w-2 rounded-full bg-amber-400"></span> Free practice · no account needed</p>
-                <h1 id="hero-title" class="font-display text-[2rem] font-extrabold leading-[1.1] sm:text-5xl lg:text-6xl">Practice WAEC, NECO &amp; JAMB. <span class="text-amber-300">Free, no login.</span></h1>
+                <h1 id="hero-title" class="font-display text-[2rem] font-extrabold leading-[1.1] sm:text-5xl lg:text-6xl">Practice <span class="hero-word" data-rotate="WAEC|NECO|JAMB">WAEC</span> the smart way. <span class="text-amber-300">Free, no login.</span></h1>
                 <p class="mt-4 max-w-xl text-[15px] leading-7 text-blue-50 sm:text-lg">Choose a subject and year, work through one question at a time, and see your score with <span class="font-semibold text-amber-300">explanations</span> when you finish.</p>
                 <div class="mt-7 flex flex-col gap-3 sm:flex-row">
-                    <a href="#exam-selector" class="inline-flex min-h-14 items-center justify-center gap-3 rounded-2xl bg-accent px-7 text-base font-extrabold text-ink shadow-lg shadow-black/20 transition active:scale-[.98] hover:bg-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 5 11 7-11 7V5Z" fill="currentColor"/></svg> Choose a practice exam <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+                    <a href="#exam-selector" class="cta-shine inline-flex min-h-14 items-center justify-center gap-3 rounded-2xl bg-accent px-7 text-base font-extrabold text-ink shadow-lg shadow-black/20 transition active:scale-[.98] hover:bg-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 5 11 7-11 7V5Z" fill="currentColor"/></svg> Choose a practice exam <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
                     <a href="#how-title" class="inline-flex min-h-14 items-center justify-center gap-3 rounded-2xl border border-white/30 bg-white/10 px-6 text-base font-bold text-white backdrop-blur transition active:scale-[.98] hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h7a3 3 0 0 1 3 3v14a2 2 0 0 0-2-2H2V4ZM22 4h-7a3 3 0 0 0-3 3v14a2 2 0 0 1 2-2h8V4Z"/></svg> How it works</a>
                 </div>
             </div>
             <div class="relative mx-auto hidden w-full max-w-md lg:block" aria-hidden="true">
-                <svg viewBox="0 0 420 360" class="w-full drop-shadow-2xl" xmlns="http://www.w3.org/2000/svg">
+                <div class="hero-ring"></div><div class="hero-ring hero-ring-2"></div><svg viewBox="0 0 420 360" class="hero-cap w-full drop-shadow-2xl" data-parallax xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <linearGradient id="bkA" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#60a5fa"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient>
                         <linearGradient id="bkB" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#1e3a8a"/></linearGradient>
@@ -91,15 +92,16 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
                     <path d="M210 52 70 106l140 54 140-54-140-54Z" fill="url(#capT)"/><path d="M210 52 70 106l140 54" fill="none" stroke="#475569" stroke-width="2"/>
                     <path d="M210 106 332 112v52" fill="none" stroke="#f59e0b" stroke-width="5" stroke-linecap="round"/><circle cx="332" cy="112" r="6" fill="#fbbf24"/><path d="M332 118v44" stroke="#f59e0b" stroke-width="9" stroke-linecap="round"/><path d="M326 160h12l4 22h-20Z" fill="#f59e0b"/>
                 </svg>
+                <div class="hero-chip hero-chip-a">✔ Instant marking</div><div class="hero-chip hero-chip-b">⏱ Timed like the real CBT</div><div class="hero-chip hero-chip-c">★ Explanations</div>
             </div>
         </div>
     </section>
 
     <section class="relative z-10 mx-auto -mt-16 max-w-7xl px-4 sm:px-6 lg:-mt-20 lg:px-8" aria-label="At a glance">
         <div class="grid grid-cols-3 gap-2.5 sm:gap-4">
-            <div class="rounded-2xl bg-white p-3 shadow-xl ring-1 ring-slate-200/70 sm:p-5"><span class="mb-2 grid h-9 w-9 place-items-center rounded-full bg-blue-600 text-white sm:h-11 sm:w-11"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01"/></svg></span><p class="font-display text-xl font-extrabold text-ink sm:text-3xl">1,800+</p><p class="text-[11px] font-medium leading-tight text-slate-500 sm:text-sm">Practice questions</p></div>
-            <div class="rounded-2xl bg-white p-3 shadow-xl ring-1 ring-slate-200/70 sm:p-5"><span class="mb-2 grid h-9 w-9 place-items-center rounded-full bg-violet-600 text-white sm:h-11 sm:w-11"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span><p class="font-display text-xl font-extrabold text-ink sm:text-3xl">22</p><p class="text-[11px] font-medium leading-tight text-slate-500 sm:text-sm">Years, 2005–2026</p></div>
-            <div class="rounded-2xl bg-white p-3 shadow-xl ring-1 ring-slate-200/70 sm:p-5"><span class="mb-2 grid h-9 w-9 place-items-center rounded-full bg-emerald-600 text-white sm:h-11 sm:w-11"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12 5 5L20 6"/></svg></span><p class="font-display text-xl font-extrabold text-ink sm:text-3xl">3</p><p class="text-[11px] font-medium leading-tight text-slate-500 sm:text-sm">Exam boards</p></div>
+            <div class="stat-card rounded-2xl bg-white p-3 shadow-xl ring-1 ring-slate-200/70 sm:p-5"><span class="mb-2 grid h-9 w-9 place-items-center rounded-full bg-blue-600 text-white sm:h-11 sm:w-11"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01"/></svg></span><p class="font-display text-xl font-extrabold text-ink sm:text-3xl"><span data-count="1800" data-suffix="+">1,800+</span></p><p class="text-[11px] font-medium leading-tight text-slate-500 sm:text-sm">Practice questions</p></div>
+            <div class="stat-card rounded-2xl bg-white p-3 shadow-xl ring-1 ring-slate-200/70 sm:p-5"><span class="mb-2 grid h-9 w-9 place-items-center rounded-full bg-violet-600 text-white sm:h-11 sm:w-11"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span><p class="font-display text-xl font-extrabold text-ink sm:text-3xl"><span data-count="22">22</span></p><p class="text-[11px] font-medium leading-tight text-slate-500 sm:text-sm">Years, 2005–2026</p></div>
+            <div class="stat-card rounded-2xl bg-white p-3 shadow-xl ring-1 ring-slate-200/70 sm:p-5"><span class="mb-2 grid h-9 w-9 place-items-center rounded-full bg-emerald-600 text-white sm:h-11 sm:w-11"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12 5 5L20 6"/></svg></span><p class="font-display text-xl font-extrabold text-ink sm:text-3xl"><span data-count="3">3</span></p><p class="text-[11px] font-medium leading-tight text-slate-500 sm:text-sm">Exam boards</p></div>
         </div>
     </section>
 
@@ -121,7 +123,7 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
                 </div>
             </div>
             <div class="mb-6 flex flex-wrap gap-2" data-selection-list aria-live="polite"></div>
-            <form action="<?= e($baseUrl) ?>/start" method="post" id="selector-form" data-selector-form data-api-url="<?= e($baseUrl) ?>/api/exams">
+            <form action="<?= e($baseUrl) ?>/start" method="post" id="selector-form" data-selector-form data-api-url="<?= e($baseUrl) ?>/api/exams"<?php if (!empty($knownProfile)): ?> data-known-name="<?= e($knownProfile['name']) ?>" data-known-email="<?= e($knownProfile['email']) ?>"<?php endif; ?>>
                 <input type="hidden" name="_csrf_token" value="<?= e($csrfToken) ?>">
                 <input type="hidden" name="exam_id" id="exam-id" value="">
                 <input type="hidden" name="student_name" id="student-name-hidden" value="">
@@ -280,5 +282,18 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
         </div>
     </div>
 </footer>
+<div class="launch" data-launch hidden aria-live="polite" role="status">
+    <div class="launch__card">
+        <div class="launch__ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 10-10-5-10 5 10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+        <p class="launch__hello" data-launch-hello>Get ready</p>
+        <p class="launch__title" data-launch-title>Preparing your exam</p>
+        <ul class="launch__steps">
+            <li data-step>Setting up your questions</li>
+            <li data-step>Shuffling the options</li>
+            <li data-step>Starting your timer</li>
+        </ul>
+        <div class="launch__bar"><span></span></div>
+    </div>
+</div>
 </body>
 </html>
