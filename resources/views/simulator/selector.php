@@ -245,40 +245,40 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
     <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div class="grid gap-8 lg:grid-cols-[1.3fr_0.7fr_0.7fr_1fr]">
             <div>
-                <a href="<?= e($homeUrl) ?>" class="brand inline-flex items-center gap-3 text-lg font-extrabold text-ink" aria-label="ExamCore CBT home">
+                <a href="<?= e($homeUrl) ?>" class="brand inline-flex items-center gap-3 text-lg font-extrabold text-white" aria-label="<?= e($appName) ?> home">
                     <svg class="h-9 w-9" viewBox="0 0 40 40" role="img" aria-label=""><path d="M5 8.5 20 2l15 6.5v13c0 8.4-6.1 13.2-15 16C11.1 34.7 5 29.9 5 21.5v-13Z" fill="#1E40AF"/><path d="M13 13h14M13 19h14M13 25h8" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="2.5"/></svg>
-                    <span>ExamCore <span class="font-medium text-primary">CBT</span></span>
+                    <span><?= e($appName) ?></span>
                 </a>
-                <p class="mt-4 max-w-sm text-sm leading-7 text-muted">Premium CBT practice for JAMB, WAEC and NECO students. Train with realistic subject sets, timed exercises, and instant feedback.</p>
+                <p class="mt-4 max-w-sm text-sm leading-7 text-slate-200">Premium CBT practice for JAMB, WAEC and NECO students. Train with realistic subject sets, timed exercises, and instant feedback.</p>
             </div>
             <div>
-                <h3 class="text-sm font-extrabold uppercase tracking-[.18em] text-primary">Practice</h3>
-                <ul class="mt-4 space-y-3 text-sm text-muted">
-                    <li><a href="#exam-selector" class="hover:text-primary">Choose exam</a></li>
-                    <li><a href="#how-title" class="hover:text-primary">How it works</a></li>
-                    <li><a href="#recent-title" class="hover:text-primary">Recent scores</a></li>
+                <h3 class="text-sm font-extrabold uppercase tracking-[.18em] text-amber-300">Practice</h3>
+                <ul class="mt-4 space-y-3 text-sm text-slate-200">
+                    <li><a href="#exam-selector" class="hover:text-amber-300">Choose exam</a></li>
+                    <li><a href="#how-title" class="hover:text-amber-300">How it works</a></li>
+                    <li><a href="#recent-title" class="hover:text-amber-300">Recent scores</a></li>
                 </ul>
             </div>
             <div>
-                <h3 class="text-sm font-extrabold uppercase tracking-[.18em] text-primary">Boards</h3>
-                <ul class="mt-4 space-y-3 text-sm text-muted">
+                <h3 class="text-sm font-extrabold uppercase tracking-[.18em] text-amber-300">Boards</h3>
+                <ul class="mt-4 space-y-3 text-sm text-slate-200">
                     <li>JAMB</li>
                     <li>WAEC</li>
                     <li>NECO</li>
                 </ul>
             </div>
             <div>
-                <h3 class="text-sm font-extrabold uppercase tracking-[.18em] text-primary">Support</h3>
-                <ul class="mt-4 space-y-3 text-sm text-muted">
+                <h3 class="text-sm font-extrabold uppercase tracking-[.18em] text-amber-300">Support</h3>
+                <ul class="mt-4 space-y-3 text-sm text-slate-200">
                     <li>Anonymous exam mode</li>
                     <li>Instant explanations</li>
                     <li>Subject-by-subject practice</li>
                 </ul>
             </div>
         </div>
-        <div class="mt-10 flex flex-col gap-3 border-t border-slate-200 pt-6 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+        <div class="mt-10 flex flex-col gap-3 border-t border-white/15 pt-6 text-sm text-slate-200 sm:flex-row sm:items-center sm:justify-between">
             <p>&copy; <?= date('Y') ?> <?= e($appName) ?>. All rights reserved.</p>
-            <p>Powered by <span class="font-semibold text-ink">ExamCore CBT</span></p>
+            <p>Powered by <span class="font-semibold text-white"><?= e($appName) ?></span></p>
         </div>
     </div>
 </footer>

@@ -15,18 +15,18 @@ if (($user['role'] ?? '') === 'school_admin') {
 }
 $nav = match (true) {
     $isConsole => [
-        'Overview' => [['/console', 'dashboard', 'Dashboard']],
+        'Overview' => [['/console', 'dashboard', 'Dashboard'], ['/console/announcements', 'bell', 'Announcements']],
         'Platform' => [['/console/schools', 'school', 'Schools'], ['/console/bank', 'library', 'Platform bank'], ['/console/plans', 'layers', 'Plans & features'], ['/console/flyer', 'sparkles', 'Flyer & QR'], ['/console/audit', 'list-checks', 'Audit log'], ['/console/system', 'server', 'System']],
         'Account' => [['/console/account/password', 'key', 'Password'], ['/console/account/two-factor', 'shield', 'Two-step verification']],
     ],
     $isStudentArea => [
-        'Overview' => [['/student', 'dashboard', 'My dashboard']],
+        'Overview' => [['/student', 'dashboard', 'My dashboard'], ['/student/announcements', 'bell', 'Announcements']],
         'Exams' => [['/student', 'calendar', 'My exams'], ['/student/results', 'chart', 'My results']],
         'Practice' => [['/practice', 'sparkles', 'Practice Centre'], ['/practice/progress', 'activity', 'My practice progress']],
         'Account' => [['/student/account/password', 'key', 'Password']],
     ],
     ($user['role'] ?? '') === 'school_admin' => [
-        'Overview' => [['/school', 'dashboard', 'Dashboard']],
+        'Overview' => [['/school', 'dashboard', 'Dashboard'], ['/school/announcements', 'bell', 'Announcements']],
         'People' => [['/school/students', 'graduation', 'Students'], ['/school/teachers', 'users', 'Teachers & staff']],
         'Academics' => [['/school/classes', 'school', 'Classes'], ['/school/subjects', 'book', 'Subjects'], ['/school/departments', 'layers', 'Departments'], ['/school/academic', 'calendar', 'Academic year'], ['/school/grading', 'sliders', 'Grading scale']],
         'Exams' => $soonExams,
@@ -34,7 +34,7 @@ $nav = match (true) {
         'Account' => [['/school/account/password', 'key', 'Password'], ['/school/account/two-factor', 'shield', 'Two-step verification']],
     ],
     default => [
-        'Overview' => [['/school', 'dashboard', 'Dashboard'], ['/school/my-classes', 'school', 'My classes']],
+        'Overview' => [['/school', 'dashboard', 'Dashboard'], ['/school/announcements', 'bell', 'Announcements'], ['/school/my-classes', 'school', 'My classes']],
         'Exams' => $soonExams,
         'Account' => [['/school/account/password', 'key', 'Password'], ['/school/account/two-factor', 'shield', 'Two-step verification']],
     ],
@@ -135,6 +135,7 @@ $schoolName = ($school['short_name'] ?? null) ?: ($school['name'] ?? $appName);
                 </form>
                 <a href="<?= e(url('/school/search')) ?>" class="btn btn-secondary btn-icon md:hidden" aria-label="Search"><?= icon('search', 'h-[18px] w-[18px]') ?></a>
             <?php endif; ?>
+            <span class="relative inline-flex"><a href="<?= e(url($homePath . '/announcements')) ?>" class="btn btn-secondary btn-icon" aria-label="Announcements<?= ($unread ?? 0) > 0 ? ', ' . (int) $unread . ' unread' : '' ?>" title="Announcements"><?= icon('bell', 'h-[18px] w-[18px]') ?></a><?php if (($unread ?? 0) > 0): ?><span class="pointer-events-none absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[11px] font-bold leading-none text-white ring-2 ring-white" aria-hidden="true"><?= $unread > 99 ? '99+' : (int) $unread ?></span><?php endif; ?></span>
             <button type="button" class="btn btn-secondary btn-icon hidden" data-install-app aria-label="Install the app" title="Install the app"><?= icon('download', 'h-[18px] w-[18px]') ?></button>
             <button type="button" class="btn btn-secondary btn-icon" data-theme-toggle aria-label="Toggle dark mode" title="Toggle dark mode"><?= icon('moon', 'h-[18px] w-[18px] dark:hidden') ?><?= icon('sun', 'hidden h-[18px] w-[18px] dark:block') ?></button>
         </div>

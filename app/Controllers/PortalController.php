@@ -43,7 +43,21 @@ abstract class PortalController extends Controller
             'errors' => $this->session->pull('errors', []),
             'old' => $this->session->pull('old', []),
             'currentPath' => $request->path(),
+            'unread' => $this->unreadAnnouncements(),
         ], $layout, $status);
+    }
+
+    /** Number of announcements this person has not opened yet (0 if the feature is not installed yet). */
+    private function unreadAnnouncements(): int
+    {
+        if ($this->guard->id() === null) {
+            return 0;
+        }
+        try {
+            return $this->container->get(\ExamCore\Models\Announcement::class)->unreadFor($this->guard->role(), $this->guard->schoolId(), $this->guard->id());
+        } catch (\Throwable) {
+            return 0;
+        }
     }
 
     protected function flash(string $message, string $type = 'success'): void

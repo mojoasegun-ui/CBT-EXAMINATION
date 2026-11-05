@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 use ExamCore\Controllers\AccountController;
+use ExamCore\Controllers\AnnouncementController;
 use ExamCore\Controllers\AuthController;
 use ExamCore\Controllers\BankController;
 use ExamCore\Controllers\Console\ConsoleController;
@@ -86,6 +87,9 @@ return static function (Router $router, Container $container): void {
         $router->post('/schools/{id}/impersonate', [SchoolController::class, 'impersonate']);
         $router->get('/plans', [PlanController::class, 'index']);
         $router->post('/plans/{id}', [PlanController::class, 'update']);
+        $router->get('/announcements', [AnnouncementController::class, 'index']);
+        $router->post('/announcements', [AnnouncementController::class, 'store']);
+        $router->post('/announcements/{id}/delete', [AnnouncementController::class, 'delete']);
         $router->get('/audit', [ConsoleController::class, 'audit']);
         $router->get('/flyer', [\ExamCore\Controllers\FlyerController::class, 'console']);
         $router->get('/system', [ConsoleController::class, 'system']);
@@ -107,6 +111,9 @@ return static function (Router $router, Container $container): void {
     $router->group(['prefix' => '/school', 'middleware' => [$staff]], static function (Router $router) use ($adminOnly, $bankRoutes): void {
         $router->get('/', [DashboardController::class, 'index'], name: 'school.dashboard');
         $router->post('/stop-impersonating', [DashboardController::class, 'stopImpersonating']);
+        $router->get('/announcements', [AnnouncementController::class, 'index']);
+        $router->post('/announcements', [AnnouncementController::class, 'store']);
+        $router->post('/announcements/{id}/delete', [AnnouncementController::class, 'delete']);
         $router->get('/my-classes', [TeacherController::class, 'mine']);
         $router->get('/exams', [ExamController::class, 'index']);
         $router->get('/exams/create', [ExamController::class, 'create']);
@@ -246,6 +253,9 @@ return static function (Router $router, Container $container): void {
         $router->post('/exams/{id}/snapshot', [ExamRoomController::class, 'snapshot']);
         $router->post('/exams/{id}/submit', [ExamRoomController::class, 'submit']);
         $router->get('/exams/{id}/done', [ExamRoomController::class, 'done']);
+        $router->get('/announcements', [AnnouncementController::class, 'index']);
+        $router->post('/announcements', [AnnouncementController::class, 'store']);
+        $router->post('/announcements/{id}/delete', [AnnouncementController::class, 'delete']);
         $router->get('/results', [StudentResults::class, 'index']);
         $router->get('/results/report', [StudentResults::class, 'report']);
         $router->get('/account/password', [AccountController::class, 'passwordForm']);

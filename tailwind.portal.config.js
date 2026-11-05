@@ -9,6 +9,7 @@ module.exports = {
         "./resources/views/layouts/practice.php",
         "./resources/views/layouts/practice-run.php",
         "./resources/views/practice/**/*.php",
+        "./resources/views/announcements/**/*.php",
         "./public/assets/js/practice.js",
         "./resources/views/shared/**/*.php",
         "./public/assets/js/omr-scan.js",

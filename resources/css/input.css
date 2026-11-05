@@ -102,3 +102,6 @@ body.menu-open::before{content:"";position:fixed;inset:0;z-index:30;background:r
 .launch__bar span{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,#fbbf24,#fde68a);animation:ec-fill 2.2s ease-in-out forwards}
 @keyframes ec-fill{to{width:100%}}
 @media (prefers-reduced-motion:reduce){.hero-aurora i,.hero-grid,.hero-bits b,.hero-photo,.hero-cap,.hero-ring,.hero-chip,.stat-card,.cta-shine::after,.theme-toggle__icon,.launch__ring,.launch__ring::before,.launch__ring svg{animation:none!important}}
+
+.site-footer,.site-footer p,.site-footer li,.site-footer span{color:inherit}
+.site-footer{color:#e2e8f0}
