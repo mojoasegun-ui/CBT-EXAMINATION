@@ -1,0 +1,11 @@
+<?php
+declare(strict_types=1);
+?>
+<div class="fixed inset-0 z-40 bg-slate-950/45 md:hidden" data-palette-backdrop hidden></div>
+<aside id="question-palette" class="question-panel fixed inset-x-0 bottom-0 z-50 max-h-[82vh] translate-y-full overflow-y-auto rounded-t-2xl bg-white p-5 shadow-2xl transition-transform duration-200 ease-out motion-reduce:transition-none md:sticky md:top-24 md:z-auto md:max-h-none md:translate-y-0 md:rounded-2xl md:p-5 md:shadow-sm md:ring-1 md:ring-slate-200/70" data-palette-panel aria-label="Question palette" aria-hidden="true">
+    <div class="flex items-center justify-between"><div><p class="text-xs font-extrabold uppercase tracking-[.13em] text-primary">Your progress</p><h2 class="mt-1 font-display text-xl font-bold text-ink">Questions</h2></div><button type="button" class="grid h-11 w-11 place-items-center rounded-xl text-xl text-slate-600 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 md:hidden" aria-label="Close question palette" data-palette-close>×</button></div>
+    <p class="mt-2 text-sm text-muted"><span data-answered-count>0</span> of <?= count($questions) ?> answered</p>
+    <div class="mt-5 grid grid-cols-5 gap-2" data-palette-grid aria-label="Jump to question"></div>
+    <div class="mt-5 grid gap-2 text-xs text-slate-600" aria-label="Question palette legend"><span class="inline-flex items-center gap-2"><i class="h-3 w-3 rounded-sm border border-slate-300 bg-white"></i> Not answered</span><span class="inline-flex items-center gap-2"><i class="h-3 w-3 rounded-sm bg-primary"></i> Answered</span><span class="inline-flex items-center gap-2"><i class="h-3 w-3 rounded-sm bg-amber-400"></i> Flagged</span></div>
+    <div class="mt-6 hidden md:block"><button type="button" class="min-h-12 w-full rounded-xl bg-primary px-4 font-bold text-white transition hover:bg-primary-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600" data-open-submit>Submit exam</button></div>
+</aside>

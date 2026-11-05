@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="bootstrap/autoload.php" colors="true" cacheDirectory=".phpunit.cache">
+    <testsuites>
+        <testsuite name="ExamCore Foundation">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

@@ -1,0 +1,31 @@
+# Secrets and machine-specific config
+/.env
+/phpunit.xml
+.phpunit.cache/
+
+# Dependencies (reinstall with: composer install && npm install)
+/vendor/
+/node_modules/
+
+# Runtime data: never commit (sessions, logs, backups, exam snapshots)
+/storage/cache/*
+!/storage/cache/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
+/storage/sessions/*
+!/storage/sessions/.gitkeep
+/storage/backups/*
+!/storage/backups/.gitkeep
+/storage/proctoring/*
+!/storage/proctoring/.gitkeep
+
+# Uploaded files: student photos and school logos are personal data
+/public/uploads/*
+!/public/uploads/.htaccess
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

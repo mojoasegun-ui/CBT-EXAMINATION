@@ -1,0 +1,32 @@
+@import "./legacy.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+	@media (prefers-reduced-motion: no-preference) {
+		.motion-ready .motion-reveal {
+			opacity: 0;
+			transform: translateY(14px);
+			transition: opacity 500ms ease-out, transform 500ms ease-out;
+		}
+
+		.motion-ready .motion-reveal.is-visible {
+			opacity: 1;
+			transform: translateY(0);
+		}
+
+		.motion-ready .motion-stagger > :nth-child(2) { transition-delay: 70ms; }
+		.motion-ready .motion-stagger > :nth-child(3) { transition-delay: 140ms; }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.motion-reveal,
+		.motion-reveal.is-visible {
+			opacity: 1 !important;
+			transform: none !important;
+			transition: none !important;
+		}
+	}
+}

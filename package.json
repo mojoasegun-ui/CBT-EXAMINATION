@@ -1,0 +1,19 @@
+{
+    "private": true,
+    "scripts": {
+        "build:css": "npm run build:app && npm run build:portal",
+        "build:app": "tailwindcss -i ./resources/css/input.css -o ./public/assets/css/app.css --minify",
+        "build:portal": "tailwindcss -c ./tailwind.portal.config.js -i ./resources/css/portal.css -o ./public/assets/css/portal.css --minify",
+        "watch:portal": "tailwindcss -c ./tailwind.portal.config.js -i ./resources/css/portal.css -o ./public/assets/css/portal.css --watch",
+        "watch:css": "tailwindcss -i ./resources/css/input.css -o ./public/assets/css/app.css --watch"
+    },
+    "devDependencies": {
+        "@fontsource-variable/inter": "^5.3.0",
+        "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
+        "@vladmandic/face-api": "^1.7.15",
+        "autoprefixer": "^10.4.21",
+        "postcss": "^8.5.6",
+        "sharp": "^0.33.5",
+        "tailwindcss": "^3.4.17"
+    }
+}
