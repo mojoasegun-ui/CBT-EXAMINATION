@@ -8,7 +8,7 @@
  *   browser's error screen.
  * - Anything that is not a GET (sign-in, saving answers, submitting) bypasses the worker.
  */
-const VERSION = "examcore-2026-11-06b";
+const VERSION = "examcore-2026-11-09a";
 const STATIC_CACHE = `${VERSION}-static`;
 const MAX_STATIC_ENTRIES = 200;
 const scope = self.registration.scope; // e.g. https://cbt.example.ng/ or http://localhost/CBT-EXAMINATION/
@@ -89,4 +89,56 @@ self.addEventListener("message", (event) => {
             for (const request of await cache.keys()) if (request.url.includes("/uploads/")) await cache.delete(request);
         }));
     }
+});
+
+
+/* ---- Phone notifications -------------------------------------------------------------------
+ * A push is only a wake-up. We then ask the site (using the signed-in cookie) what to show, so the
+ * words never pass through the push provider. Each kind of notice buzzes and behaves differently.
+ * (The alert sound is the phone's own notification sound; websites cannot choose a custom one.)
+ */
+const KINDS = {
+    exam: { vibrate: [500, 150, 500, 150, 500], requireInteraction: true },
+    result: { vibrate: [120, 80, 120, 80, 400] },
+    announcement: { vibrate: [200, 100, 200] },
+    general: { vibrate: [150] },
+};
+self.addEventListener("push", (event) => {
+    event.waitUntil((async () => {
+        let items = [];
+        try {
+            const response = await fetch(new URL("push/pending", scope).href, { credentials: "same-origin", cache: "no-store" });
+            if (response.ok) items = (await response.json()).items || [];
+        } catch (error) { /* offline: fall back to a generic alert below */ }
+        if (!items.length) items = [{ id: Date.now(), type: "general", title: "ExamCore", body: "You have a new update. Tap to open.", url: "/" }];
+        for (const n of items) {
+            const kind = KINDS[n.type] || KINDS.general;
+            await self.registration.showNotification(n.title, {
+                body: n.body,
+                icon: new URL("assets/icons/icon-192.png", scope).href,
+                badge: new URL("assets/icons/icon-192.png", scope).href,
+                tag: `${n.type}-${n.id}`,
+                renotify: true,
+                vibrate: kind.vibrate,
+                requireInteraction: !!kind.requireInteraction,
+                silent: false,
+                data: { url: new URL(String(n.url || "/").replace(/^\//, ""), scope).href },
+            });
+        }
+    })());
+});
+self.addEventListener("notificationclick", (event) => {
+    event.notification.close();
+    const target = event.notification.data?.url || scope;
+    event.waitUntil((async () => {
+        const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+        for (const client of windows) {
+            if (client.url.startsWith(scope) && "focus" in client) {
+                await client.focus();
+                if ("navigate" in client) await client.navigate(target).catch(() => null);
+                return;
+            }
+        }
+        await self.clients.openWindow(target);
+    })());
 });

@@ -89,6 +89,39 @@ final class Announcement extends Model
         $this->run('DELETE FROM ' . $this->table('announcements') . ' WHERE id = ?', [$id]);
     }
 
+    /**
+     * Everyone an announcement is addressed to (so each can be notified on their phone).
+     *
+     * @return list<int>
+     */
+    public function recipientIds(?int $schoolId, string $audience, ?int $classId): array
+    {
+        $ids = [];
+        if ($audience === 'students' || $audience === 'everyone') {
+            $sql = 'SELECT user_id FROM ' . $this->table('student_profiles') . ' WHERE status = \'active\'';
+            $params = [];
+            if ($schoolId !== null) {
+                $sql .= ' AND school_id = ?';
+                $params[] = $schoolId;
+            }
+            if ($classId !== null) {
+                $sql .= ' AND class_id = ?';
+                $params[] = $classId;
+            }
+            $ids = array_merge($ids, array_column($this->rows($sql, $params), 'user_id'));
+        }
+        if ($audience === 'teachers' || $audience === 'everyone') {
+            $sql = 'SELECT id FROM ' . $this->table('users') . ' WHERE status = \'active\' AND role IN (\'school_admin\',\'teacher\',\'reviewer\')';
+            $params = [];
+            if ($schoolId !== null) {
+                $sql .= ' AND school_id = ?';
+                $params[] = $schoolId;
+            }
+            $ids = array_merge($ids, array_column($this->rows($sql, $params), 'id'));
+        }
+        return array_map('intval', $ids);
+    }
+
     /** @return list<array<string, mixed>> the classes a teacher is class teacher of */
     public function classesOfTeacher(int $schoolId, int $teacherId): array
     {

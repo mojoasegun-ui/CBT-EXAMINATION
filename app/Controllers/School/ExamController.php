@@ -96,6 +96,24 @@ final class ExamController extends SchoolController
         ]);
     }
 
+    /** Phone notification to the active students of the exam's classes; never blocks the action. */
+    private function notifyClasses(array $exam, string $type, string $title, string $body, string $url): void
+    {
+        try {
+            $classIds = array_map('intval', $exam['class_ids'] ?? []);
+            if ($classIds === []) {
+                return;
+            }
+            $pdo = $this->container->get(\ExamCore\Core\Database::class)->connection();
+            $in = implode(',', array_fill(0, count($classIds), '?'));
+            $stmt = $pdo->prepare('SELECT user_id FROM ' . $this->container->get(\ExamCore\Core\Database::class)->tablePrefix() . 'student_profiles' . " WHERE school_id = ? AND status = 'active' AND class_id IN ({$in})");
+            $stmt->execute([$this->schoolId(), ...$classIds]);
+            $this->container->get(\ExamCore\Services\PushService::class)->notify(array_map('intval', $stmt->fetchAll(\PDO::FETCH_COLUMN)), $this->schoolId(), $type, $title, $body, $url);
+        } catch (\Throwable) {
+            // ignore
+        }
+    }
+
     public function action(Request $request, array $parameters): Response
     {
         $exam = $this->find($parameters);
@@ -107,6 +125,7 @@ final class ExamController extends SchoolController
                     return $this->redirectTo('/school/exams/' . $id, 'Fix the items marked in red before publishing.', 'error');
                 }
                 $this->exams->setStatus($this->schoolId(), $id, 'published');
+                $this->notifyClasses($exam, 'exam', 'New exam: ' . $exam['title'], 'Opens ' . gmdate('D j M, g:ia', strtotime((string) $exam['starts_at'] . ' UTC') + 3600) . ' (WAT). Tap to see details.', '/student/exams/' . $id);
                 $this->audit->record('exam.published', 'Published “' . $exam['title'] . '”', 'exam', $id, schoolId: $this->schoolId());
                 return $this->redirectTo('/school/exams/' . $id, 'Published. Students in the selected classes can now see it.');
             case 'unpublish':
@@ -121,6 +140,7 @@ final class ExamController extends SchoolController
                 return $this->redirectTo('/school/exams?tab=past', 'Exam cancelled.', 'warning');
             case 'release':
                 $this->exams->releaseResults($this->schoolId(), $id);
+                $this->notifyClasses($exam, 'result', 'Results are out', 'Your result for ' . $exam['title'] . ' is ready. Tap to see your score.', '/student/results');
                 $this->audit->record('exam.results_released', 'Released results of “' . $exam['title'] . '”', 'exam', $id, schoolId: $this->schoolId());
                 return $this->redirectTo('/school/exams/' . $id . '/monitor', 'Results released. Students can now see their scores.');
             case 'duplicate':

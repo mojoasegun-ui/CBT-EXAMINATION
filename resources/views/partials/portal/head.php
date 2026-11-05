@@ -30,3 +30,4 @@ $brandColor ??= null;
 </script>
 <script defer src="<?= e(asset('js/portal.js')) ?>"></script>
 <script defer src="<?= e(asset('js/pwa.js')) ?>"></script>
+<script defer src="<?= e(asset('js/push.js')) ?>"></script>

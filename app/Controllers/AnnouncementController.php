@@ -127,6 +127,14 @@ final class AnnouncementController extends PortalController
             'author_role' => $role, 'audience' => $audience, 'class_id' => $classId > 0 ? $classId : null,
             'title' => $title, 'body' => $body, 'pinned' => $request->input('pinned') === '1' && $role !== User::ROLE_TEACHER ? 1 : 0,
         ]);
+        try {
+            $this->container->get(\ExamCore\Services\PushService::class)->notify(
+                array_values(array_diff($this->announcements->recipientIds($schoolId, $audience, $classId > 0 ? $classId : null), [(int) $this->guard->id()])),
+                $schoolId, 'announcement', $title, mb_substr($body, 0, 140), '/' . ($audience === 'teachers' ? 'school' : 'student') . '/announcements'
+            );
+        } catch (\Throwable) {
+            // A notification problem must never stop the post itself.
+        }
         $this->audit->record('announcement.posted', 'Posted the announcement “' . mb_substr($title, 0, 60) . '”', 'announcement', $id, schoolId: $schoolId);
         return $this->redirectTo($this->base(), 'Announcement posted.');
     }

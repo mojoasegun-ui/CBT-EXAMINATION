@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use ExamCore\Controllers\AccountController;
 use ExamCore\Controllers\AnnouncementController;
+use ExamCore\Controllers\PushController;
 use ExamCore\Controllers\AuthController;
 use ExamCore\Controllers\BankController;
 use ExamCore\Controllers\Console\ConsoleController;
@@ -236,6 +237,12 @@ return static function (Router $router, Container $container): void {
     $router->get('/verify/{token}', [VerifyController::class, 'verify']);
     $router->get('/check-result', [VerifyController::class, 'checkForm']);
     $router->post('/check-result', [VerifyController::class, 'check']);
+
+    // ---- Phone notifications (any signed-in role) ----------------------------------------
+    $router->post('/push/subscribe', [PushController::class, 'subscribe']);
+    $router->post('/push/unsubscribe', [PushController::class, 'unsubscribe']);
+    $router->post('/push/test', [PushController::class, 'test']);
+    $router->get('/push/pending', [PushController::class, 'pending']);
 
     // ---- Student portal ------------------------------------------------------------------
     $router->get('/s/{slug}', [StudentPortal::class, 'schoolLink']);

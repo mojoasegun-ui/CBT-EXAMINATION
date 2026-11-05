@@ -37,6 +37,7 @@ final class Kernel
             'bank:seed-starter' => ['Load the original starter questions into the platform bank and public practice sets', fn (array $o): int => $this->seedStarter()],
             'bank:seed-syllabus' => ['Load the syllabus-based practice questions (database/seeds/syllabus) into the platform bank; safe to re-run', fn (array $o): int => $this->seedSyllabus()],
             'bank:build-sets' => ['Build year-named public practice sets (2005-2026) from the bank. --board=jamb|waec|neco --subject="Biology" --from=2005 --to=2026', fn (array $o): int => $this->buildSets($o)],
+            'push:keys' => ['Create the VAPID keys for phone notifications in .env if missing (never overwrites)', fn (array $o): int => $this->pushKeys()],
             'owner:create' => ['Create an Owner Console account. --name="Ada Obi" --email=you@x.ng [--password=...]', fn (array $o): int => $this->createOwner($o)],
         ];
     }
@@ -128,6 +129,21 @@ final class Kernel
         $service = new BackupService($this->container->get(Database::class), $this->container->get('root') . '/storage/backups');
         $path = $service->create();
         $this->line("\033[32mBackup written:\033[0m {$path} (" . number_format((float) filesize($path) / 1024, 1) . ' KB)');
+        return 0;
+    }
+
+    private function pushKeys(): int
+    {
+        $env = $this->container->get('root') . '/.env';
+        $contents = is_file($env) ? (string) file_get_contents($env) : '';
+        if (preg_match('/^VAPID_PUBLIC=\S+/m', $contents) && preg_match('/^VAPID_PRIVATE=\S+/m', $contents)) {
+            $this->line('Phone-notification keys already exist. Nothing changed.');
+            return 0;
+        }
+        $keys = \ExamCore\Services\PushService::generateKeys();
+        $contents = preg_replace('/^VAPID_(PUBLIC|PRIVATE)=.*$/m', '', $contents) ?? $contents;
+        file_put_contents($env, rtrim($contents) . PHP_EOL . 'VAPID_PUBLIC=' . $keys['public'] . PHP_EOL . 'VAPID_PRIVATE=' . $keys['private'] . PHP_EOL, LOCK_EX);
+        $this->line("\033[32mAdded VAPID_PUBLIC and VAPID_PRIVATE to .env.\033[0m Back up your .env; changing these keys disconnects every subscribed phone.");
         return 0;
     }
 

@@ -201,6 +201,8 @@ final class Application
             => 'auto-submitted ' . $services->get(\ExamCore\Services\PracticeService::class)->expireOverdue($web ? 15 : 200) . ' mock exam(s)');
         $scheduler->every(60, 'sittings:expire', static fn (bool $web): string
             => 'auto-submitted ' . $services->get(\ExamCore\Services\SittingService::class)->expireOverdue($web ? 25 : 500) . ' sitting(s)');
+        $scheduler->every(60, 'push:drain', static fn (bool $web): string
+            => 'woke ' . $services->get(\ExamCore\Services\PushService::class)->drain($web ? 60 : 300) . ' phone(s)');
         $scheduler->every(60, 'queue:work', static fn (bool $web): string
             => 'processed ' . $services->get(Worker::class)->work($web ? 3 : 50, $web ? 8.0 : 50.0) . ' job(s)');
         $scheduler->every(300, 'queue:release-stale', static fn (): string

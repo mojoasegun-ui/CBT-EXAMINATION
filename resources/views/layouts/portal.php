@@ -142,6 +142,7 @@ $schoolName = ($school['short_name'] ?? null) ?: ($school['name'] ?? $appName);
     </header>
 
     <main id="main" tabindex="-1" class="mx-auto w-full max-w-[1320px] px-4 py-8 focus:outline-none sm:px-8 lg:px-10 lg:py-10" data-stagger>
+        <?php require __DIR__ . '/../partials/portal/push-banner.php'; ?>
         <?= $content ?>
     </main>
 </div>
