@@ -28,7 +28,27 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
             <button type="button" class="theme-toggle" aria-label="Toggle dark mode" data-theme-toggle>
                 <span class="theme-toggle__icon" aria-hidden="true">☀️</span>
             </button>
-            <button type="button" class="grid h-10 w-10 place-items-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-primary hover:bg-blue-50 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600" aria-label="Open student profile" data-open-identity-modal>
+            <details class="signin-menu relative">
+                <summary class="flex h-10 cursor-pointer list-none items-center gap-1.5 whitespace-nowrap rounded-full bg-primary px-3.5 text-sm font-bold text-white sm:px-4 shadow-sm transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 [&::-webkit-details-marker]:hidden">
+                    Sign in
+                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                </summary>
+                <div class="absolute right-0 top-12 z-50 w-72 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
+                    <a href="<?= e(url('/student/login')) ?>" class="flex items-start gap-3 rounded-xl p-3 transition hover:bg-blue-50">
+                        <span class="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue-100 text-primary"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 10-10-5-10 5 10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></span>
+                        <span><span class="block text-sm font-bold text-ink">Student</span><span class="block text-xs leading-5 text-slate-500">Write your school exams and see your results</span></span>
+                    </a>
+                    <a href="<?= e(url('/login')) ?>" class="flex items-start gap-3 rounded-xl p-3 transition hover:bg-blue-50">
+                        <span class="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-emerald-100 text-emerald-700"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></span>
+                        <span><span class="block text-sm font-bold text-ink">Teacher or school admin</span><span class="block text-xs leading-5 text-slate-500">Manage exams, students and results</span></span>
+                    </a>
+                    <a href="<?= e(url('/check-result')) ?>" class="flex items-start gap-3 rounded-xl p-3 transition hover:bg-blue-50">
+                        <span class="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-100 text-amber-700"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
+                        <span><span class="block text-sm font-bold text-ink">Parent</span><span class="block text-xs leading-5 text-slate-500">Check your child's result with the result code</span></span>
+                    </a>
+                </div>
+            </details>
+            <button type="button" class="hidden h-10 w-10 place-items-center rounded-full sm:grid border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-primary hover:bg-blue-50 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600" aria-label="Open student profile" data-open-identity-modal>
                 <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
             </button>
             <span class="hidden items-center gap-2 text-xs font-semibold text-slate-600 sm:inline-flex"><span class="h-2 w-2 rounded-full bg-success"></span> Anonymous session</span>
