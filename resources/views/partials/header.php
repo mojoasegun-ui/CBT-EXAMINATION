@@ -20,6 +20,10 @@ $navigation = [
             <span>ExamCore <span class="brand-light">CBT</span></span>
         </a>
 
+
+
+
+
         <nav class="desktop-nav" aria-label="Main navigation">
             <?php foreach ($navigation as [$label, $href]): ?>
                 <a href="<?= e($href) ?>"><?= e($label) ?></a>

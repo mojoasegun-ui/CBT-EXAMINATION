@@ -35,6 +35,7 @@ final class Kernel
             'db:backup' => ['Write a compressed SQL backup to storage/backups', fn (array $o): int => $this->backup()],
             'key:generate' => ['Create APP_KEY and SETUP_TOKEN in .env if missing (never overwrites)', fn (array $o): int => $this->generateKeys()],
             'bank:seed-starter' => ['Load the original starter questions into the platform bank and public practice sets', fn (array $o): int => $this->seedStarter()],
+            'bank:seed-syllabus' => ['Load the syllabus-based practice questions (database/seeds/syllabus) into the platform bank; safe to re-run', fn (array $o): int => $this->seedSyllabus()],
             'owner:create' => ['Create an Owner Console account. --name="Ada Obi" --email=you@x.ng [--password=...]', fn (array $o): int => $this->createOwner($o)],
         ];
     }
@@ -176,6 +177,44 @@ final class Kernel
             $this->line("Generated password (shown once): {$password}");
         }
         $this->line('Sign in at /console/login');
+        return 0;
+    }
+
+    /** Platform-bank questions written against the official syllabus topics. Duplicates are skipped by fingerprint. */
+    private function seedSyllabus(): int
+    {
+        $dir = $this->container->get('root') . '/database/seeds/syllabus';
+        $bank = $this->container->get(\ExamCore\Models\BankQuestion::class);
+        $pdo = $this->container->get(Database::class)->connection();
+        $owner = (int) $pdo->query("SELECT id FROM cbt_users WHERE role = 'owner' ORDER BY id LIMIT 1")->fetchColumn() ?: null;
+        $files = glob($dir . '/[0-9]*.php') ?: [];
+        sort($files);
+        $total = 0;
+        $skipped = 0;
+        foreach ($files as $file) {
+            foreach ((require $file) as $subject => $questions) {
+                $added = 0;
+                foreach ($questions as [$topic, $difficulty, $body, $a, $b, $c, $d, $answer, $explanation]) {
+                    $options = [$a, $b, $c, $d];
+                    if (count(array_unique($options)) !== 4 || !in_array($answer, ['A', 'B', 'C', 'D'], true) || mb_strlen($body) < 8) {
+                        $this->line("  skipped an invalid question in {$subject}: " . mb_substr($body, 0, 60));
+                        $skipped++;
+                        continue;
+                    }
+                    $fingerprint = \ExamCore\Services\QuestionBankService::fingerprint($body . '|' . implode('|', $options));
+                    if ($bank->duplicateOf(null, $fingerprint) !== null) {
+                        continue;
+                    }
+                    $bank->create(null, (int) $owner, ['subject' => $subject, 'topic' => $topic, 'difficulty' => $difficulty, 'level' => 'ss', 'source' => 'practice', 'body' => $body,
+                        'option_a' => $a, 'option_b' => $b, 'option_c' => $c, 'option_d' => $d, 'correct_option' => $answer, 'explanation' => $explanation, 'marks' => 1,
+                        'status' => 'published', 'fingerprint' => $fingerprint]);
+                    $added++;
+                }
+                $total += $added;
+                $this->line(sprintf('  %-24s +%d  (%s)', $subject, $added, basename($file)));
+            }
+        }
+        $this->line("Added {$total} question(s)" . ($skipped ? ", skipped {$skipped} invalid" : '') . '.');
         return 0;
     }
 
