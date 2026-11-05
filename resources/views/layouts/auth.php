@@ -27,7 +27,7 @@ $slides = $isConsole
     <main class="relative flex flex-col px-5 py-8 sm:px-10 lg:px-16">
         <header class="flex items-center justify-between">
             <a href="<?= e(url('/')) ?>" class="group flex items-center gap-3">
-                <span class="shine grid h-10 w-10 place-items-center rounded-2xl bg-signature font-display text-[15px] font-bold text-white shadow-[0_10px_22px_-8px_rgb(var(--brand)/.7)] transition-transform duration-300 group-hover:rotate-[-4deg]">E</span>
+                <span class="shine grid h-10 w-10 place-items-center rounded-2xl bg-signature shadow-[0_10px_22px_-8px_rgb(var(--brand)/.7)] transition-transform duration-300 group-hover:rotate-[-4deg]"><?php require __DIR__ . '/../partials/brand-mark.php'; ?></span>
                 <span class="font-display text-[17px] font-semibold tracking-tight text-ink"><?= e($appName) ?></span>
             </a>
             <button type="button" class="btn btn-secondary btn-icon" data-theme-toggle aria-label="Toggle dark mode"><?= icon('moon', 'h-4 w-4 dark:hidden') ?><?= icon('sun', 'hidden h-4 w-4 dark:block') ?></button>

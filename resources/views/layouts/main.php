@@ -11,7 +11,7 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="<?= e($csrfToken ?? '') ?>">
     <meta name="description" content="A modular computer-based testing platform foundation for schools and institutions.">
-    <meta name="theme-color" content="#f8fafc">
+    <meta name="theme-color" content="#1E40AF">
     <title><?= e($appName) ?> | Assessment Platform</title>
     <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
     <script defer src="<?= e(asset('js/app.js')) ?>"></script>

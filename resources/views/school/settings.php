@@ -18,7 +18,7 @@ $v = static fn (string $k): string => (string) ($old[$k] ?? $school[$k] ?? '');
             <?= field('phone', 'Phone', $v('phone'), $errors, ['type' => 'tel']) ?>
             <?= field('address', 'Address', $v('address'), $errors, ['class' => 'sm:col-span-2']) ?>
             <div class="sm:col-span-2">
-                <p class="label">Brand colour</p>
+                <p class="label">School colour <span class="label-hint">· used on your logo tile and printed documents</span></p>
                 <div class="flex max-w-sm items-center gap-3">
                     <input type="color" class="h-12 w-14 cursor-pointer rounded-2xl border border-line bg-card p-1" value="<?= e($v('primary_color')) ?>" data-color-picker aria-label="Pick a colour">
                     <input class="input font-mono uppercase" name="primary_color" value="<?= e($v('primary_color')) ?>" maxlength="7" data-color-text aria-label="Colour hex code">

@@ -7,7 +7,7 @@ $brandColor ??= null;
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="csrf-token" content="<?= e($csrfToken) ?>">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#1E40AF">
 <title><?= e($title) ?> · <?= e($appName) ?></title>
 <link rel="manifest" href="<?= e(url('/manifest.webmanifest')) ?>">
 <link rel="icon" type="image/png" sizes="32x32" href="<?= e(asset('icons/favicon-32.png')) ?>">

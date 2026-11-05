@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 /** Distraction-free shell for the exam room. @var string $content @var array<string,mixed> $school */
-$brandColor = $school['primary_color'] ?? null;
+$brandColor = null; // one platform colour for every role
 ?>
 <!doctype html>
 <html lang="en" class="exam-shell">

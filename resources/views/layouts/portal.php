@@ -8,7 +8,7 @@ $area ??= 'console';
 $isConsole = $area === 'console';
 $isStudentArea = $area === 'student';
 $school ??= null;
-$brandColor = $isConsole ? null : ($school['primary_color'] ?? null);
+$brandColor = null; // one platform colour for every role; the school colour only tints the school logo tile and printed documents
 $soonExams = [['/school/bank', 'library', 'Question bank'], ['/school/exams', 'calendar', 'Exams & schedule']];
 if (($user['role'] ?? '') === 'school_admin') {
     $soonExams[] = ['/school/results', 'chart', 'Results & report cards'];
@@ -76,7 +76,7 @@ $schoolName = ($school['short_name'] ?? null) ?: ($school['name'] ?? $appName);
                 <?php if (!$isConsole && !empty($school['logo_path'])): ?>
                     <img src="<?= e(url('/' . $school['logo_path'])) ?>" alt="" class="h-10 w-10 shrink-0 rounded-2xl border border-line bg-white object-contain p-1">
                 <?php else: ?>
-                    <span class="shine grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-signature font-display text-[15px] font-bold text-brand-ink shadow-[0_10px_22px_-8px_rgb(var(--brand)/.7)] transition-transform duration-300 group-hover:rotate-[-4deg] group-hover:scale-105"><?= e($isConsole ? 'E' : initials((string) ($school['name'] ?? 'S'))) ?></span>
+                    <span class="shine grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-signature font-display text-[15px] font-bold text-brand-ink shadow-[0_10px_22px_-8px_rgb(var(--brand)/.7)] transition-transform duration-300 group-hover:rotate-[-4deg] group-hover:scale-105"><?php if ($isConsole): require __DIR__ . '/../partials/brand-mark.php'; else: ?><span class="font-display text-[15px] font-bold"><?= e(initials((string) ($school['name'] ?? 'S'))) ?></span><?php endif; ?></span>
                 <?php endif; ?>
                 <span class="min-w-0">
                     <span class="block truncate font-display text-[16px] font-semibold tracking-tight text-ink"><?= e($isConsole ? $appName : $schoolName) ?></span>

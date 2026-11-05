@@ -13,11 +13,11 @@ use ExamCore\Core\Request;
 use ExamCore\Core\Response;
 use ExamCore\Core\Router;
 use ExamCore\Core\Session;
-use ExamCore\Core\Validator;
-use ExamCore\Middleware\CsrfMiddleware;
+use ExamCore\Core\Validator;  
+use ExamCore\Middleware\CsrfMiddleware;       
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-
+         
 final class FoundationTest extends TestCase
 {
     private string $sessionDirectory = '';
@@ -200,3 +200,16 @@ final class FoundationTest extends TestCase
         self::assertStringContainsString('text/html', $page->headers()['Content-Type'] ?? '');
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

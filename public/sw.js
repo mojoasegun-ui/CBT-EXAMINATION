@@ -8,7 +8,7 @@
  *   browser's error screen.
  * - Anything that is not a GET (sign-in, saving answers, submitting) bypasses the worker.
  */
-const VERSION = "examcore-2026-11-05";
+const VERSION = "examcore-2026-11-06";
 const STATIC_CACHE = `${VERSION}-static`;
 const MAX_STATIC_ENTRIES = 200;
 const scope = self.registration.scope; // e.g. https://cbt.example.ng/ or http://localhost/CBT-EXAMINATION/

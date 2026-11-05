@@ -2,7 +2,7 @@
 declare(strict_types=1);
 /** Print shell for result slips and report cards: A4 pages on screen, clean output on paper. @var string $content */
 $school ??= null;
-$brandColor = $school['primary_color'] ?? null;
+$brandColor = null; // one platform colour for every role
 $back ??= null;
 ?>
 <!doctype html>

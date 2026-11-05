@@ -9,31 +9,31 @@
     @media (prefers-reduced-motion: reduce) { .float-a, .float-b, .scan { animation: none; } }
   </style>
   <defs>
-    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366F1"/><stop offset="1" stop-color="#A855F7"/></linearGradient>
-    <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E4E2F7"/><stop offset="1" stop-color="#C4BFE8"/></linearGradient>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1E40AF"/><stop offset="1" stop-color="#3B82F6"/></linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#DBE4F5"/><stop offset="1" stop-color="#C4BFE8"/></linearGradient>
     <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#F3F1FF"/></linearGradient>
     <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8D5A3B"/><stop offset="1" stop-color="#6B4129"/></linearGradient>
-    <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8B5CF6" stop-opacity="0"/><stop offset=".5" stop-color="#8B5CF6" stop-opacity=".55"/><stop offset="1" stop-color="#8B5CF6" stop-opacity="0"/></linearGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3B82F6" stop-opacity="0"/><stop offset=".5" stop-color="#3B82F6" stop-opacity=".55"/><stop offset="1" stop-color="#3B82F6" stop-opacity="0"/></linearGradient>
     <radialGradient id="orbGreen" cx=".32" cy=".28" r=".75"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".25" stop-color="#86EFAC"/><stop offset=".72" stop-color="#10B981"/><stop offset="1" stop-color="#065F46"/></radialGradient>
     <radialGradient id="orbGold" cx=".32" cy=".28" r=".75"><stop offset="0" stop-color="#FFFBEA"/><stop offset=".25" stop-color="#F7D774"/><stop offset=".72" stop-color="#D4A12A"/><stop offset="1" stop-color="#8A5A0B"/></radialGradient>
-    <radialGradient id="orbViolet" cx=".32" cy=".28" r=".75"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".22" stop-color="#C4B5FD"/><stop offset=".7" stop-color="#7C3AED"/><stop offset="1" stop-color="#4C1D95"/></radialGradient>
+    <radialGradient id="orbViolet" cx=".32" cy=".28" r=".75"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".22" stop-color="#93C5FD"/><stop offset=".7" stop-color="#2563EB"/><stop offset="1" stop-color="#1E3A8A"/></radialGradient>
     <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="16"/></filter>
-    <filter id="lift" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#2E1065" flood-opacity=".15"/></filter>
+    <filter id="lift" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#172554" flood-opacity=".15"/></filter>
     <clipPath id="screen"><rect x="214" y="58" width="132" height="268" rx="22"/></clipPath>
   </defs>
 
-  <ellipse cx="280" cy="372" rx="170" ry="20" fill="#4338CA" opacity=".12" filter="url(#soft)"/>
-  <ellipse cx="280" cy="170" rx="180" ry="120" fill="#A78BFA" opacity=".15" filter="url(#soft)"/>
+  <ellipse cx="280" cy="372" rx="170" ry="20" fill="#1D4ED8" opacity=".12" filter="url(#soft)"/>
+  <ellipse cx="280" cy="170" rx="180" ry="120" fill="#60A5FA" opacity=".15" filter="url(#soft)"/>
 
   <!-- phone -->
   <g filter="url(#lift)">
     <rect x="212" y="52" width="148" height="300" rx="32" fill="url(#edge)"/>
-    <rect x="200" y="42" width="148" height="300" rx="32" fill="#1E1B4B"/>
+    <rect x="200" y="42" width="148" height="300" rx="32" fill="#172554"/>
     <rect x="206" y="48" width="136" height="288" rx="27" fill="url(#glass)"/>
   </g>
-  <rect x="254" y="56" width="40" height="8" rx="4" fill="#1E1B4B"/>
+  <rect x="254" y="56" width="40" height="8" rx="4" fill="#172554"/>
   <g clip-path="url(#screen)">
-    <text x="274" y="96" text-anchor="middle" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#8B8BA7" letter-spacing="1">IDENTITY CHECK</text>
+    <text x="274" y="96" text-anchor="middle" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#94A3B8" letter-spacing="1">IDENTITY CHECK</text>
     <!-- face -->
     <circle cx="274" cy="168" r="44" fill="#EDE9FE"/>
     <path d="M238 230c4-24 20-34 36-34s32 10 36 34z" fill="url(#brand)" opacity=".9"/>
@@ -48,24 +48,24 @@
     <rect class="scan" x="226" y="118" width="96" height="14" fill="url(#beam)"/>
     <rect x="226" y="256" width="96" height="30" rx="12" fill="#ECFDF5"/>
     <text x="274" y="275" text-anchor="middle" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="800" fill="#047857">Match 98%</text>
-    <rect x="236" y="298" width="76" height="6" rx="3" fill="#E7E6F5"/>
+    <rect x="236" y="298" width="76" height="6" rx="3" fill="#E2E8F0"/>
   </g>
 
   <!-- shield badge -->
   <g class="float-a">
-    <g filter="url(#lift)"><rect x="370" y="104" width="150" height="70" rx="20" fill="#FFFFFF" stroke="#F0EEFB"/></g>
+    <g filter="url(#lift)"><rect x="370" y="104" width="150" height="70" rx="20" fill="#FFFFFF" stroke="#EFF6FF"/></g>
     <circle cx="402" cy="139" r="18" fill="url(#orbGreen)"/>
     <path d="m395 139 5 5 9-10" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="428" y="134" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#8B8BA7" letter-spacing="1">VERIFIED</text>
-    <text x="428" y="151" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="800" fill="#1E1B4B">Ada Okafor</text>
+    <text x="428" y="134" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#94A3B8" letter-spacing="1">VERIFIED</text>
+    <text x="428" y="151" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="800" fill="#172554">Ada Okafor</text>
   </g>
   <!-- warning chip -->
   <g class="float-b">
-    <g filter="url(#lift)"><rect x="40" y="236" width="150" height="62" rx="20" fill="#FFFFFF" stroke="#F0EEFB"/></g>
+    <g filter="url(#lift)"><rect x="40" y="236" width="150" height="62" rx="20" fill="#FFFFFF" stroke="#EFF6FF"/></g>
     <circle cx="70" cy="267" r="14" fill="#FEF3C7"/>
     <path d="M70 260v8" stroke="#B45309" stroke-width="2.6" stroke-linecap="round"/><circle cx="70" cy="273" r="1.6" fill="#B45309"/>
-    <text x="92" y="262" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#8B8BA7" letter-spacing="1">TAB SWITCH</text>
-    <text x="92" y="279" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="800" fill="#1E1B4B">Logged · 1</text>
+    <text x="92" y="262" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#94A3B8" letter-spacing="1">TAB SWITCH</text>
+    <text x="92" y="279" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="800" fill="#172554">Logged · 1</text>
   </g>
   <g class="float-b"><circle cx="476" cy="270" r="22" fill="url(#orbViolet)"/><ellipse cx="470" cy="261" rx="7" ry="4" fill="#FFFFFF" opacity=".55"/></g>
   <g class="float-a"><circle cx="96" cy="110" r="16" fill="url(#orbGold)"/><ellipse cx="91" cy="104" rx="5" ry="3" fill="#FFFFFF" opacity=".6"/></g>

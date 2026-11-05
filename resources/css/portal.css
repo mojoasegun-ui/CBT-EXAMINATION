@@ -22,32 +22,32 @@
 @layer base {
     :root {
         color-scheme: light;
-        --brand: 99 91 255;          /* royal indigo; schools override with their own colour */
-        --brand-2: 168 85 247;       /* violet, for the signature gradient */
+        --brand: 30 64 175;          /* ExamCore blue (#1E40AF): the one platform colour, same as the public site */
+        --brand-2: 59 130 246;       /* lighter blue for the signature gradient */
         --brand-ink: 255 255 255;
         --canvas: 255 255 255;       /* pure white page */
         --card: 255 255 255;
-        --soft: 249 249 252;         /* barely-there fill for wells, table heads, hovers */
-        --line: 236 236 243;
-        --ink: 12 12 29;
-        --muted: 98 100 122;
-        --subtle: 150 152 172;
-        --gold: 201 162 74;
+        --soft: 248 250 252;         /* barely-there fill for wells, table heads, hovers */
+        --line: 226 232 240;
+        --ink: 15 23 42;
+        --muted: 100 116 139;
+        --subtle: 148 163 184;
+        --gold: 245 158 11;          /* amber accent, same as the public site */
         --chart: #2a78d6;
-        --chart-grid: #efeff5;
-        --shadow-tint: 24 22 61;
+        --chart-grid: #e2e8f0;
+        --shadow-tint: 15 23 42;
     }
     :root[data-theme="dark"] {
         color-scheme: dark;
-        --canvas: 9 9 18;
-        --card: 16 16 30;
-        --soft: 22 22 40;
-        --line: 38 38 60;
-        --ink: 236 236 248;
-        --muted: 164 166 190;
-        --subtle: 112 114 140;
+        --canvas: 2 8 23;
+        --card: 15 23 42;
+        --soft: 30 41 59;
+        --line: 51 65 85;
+        --ink: 226 232 240;
+        --muted: 148 163 184;
+        --subtle: 100 116 139;
         --chart: #3987e5;
-        --chart-grid: #26263e;
+        --chart-grid: #334155;
         --shadow-tint: 0 0 0;
     }
     html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }

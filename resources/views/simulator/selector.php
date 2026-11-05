@@ -10,7 +10,7 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="<?= e($csrfToken) ?>">
-    <meta name="theme-color" content="#1e40af">
+    <meta name="theme-color" content="#1E40AF">
     <meta name="description" content="Practice WAEC, NECO and JAMB questions with a free anonymous CBT simulator.">
     <title>Practice CBT | <?= e($appName) ?></title>
     <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
