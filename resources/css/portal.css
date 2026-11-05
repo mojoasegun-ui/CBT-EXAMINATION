@@ -263,3 +263,47 @@ html:not(.js) .reveal { opacity: 1; transform: none; }
     .slip { page-break-inside: avoid; }
     .slips-page { padding: 10mm; }
 }
+
+/* ---- Printable flyers ------------------------------------------------------------------------ */
+@layer components {
+    .flyer-sheet { @apply mx-auto grid gap-4 bg-white p-4 shadow-xl; max-width: 210mm; }
+    .flyer-a5 { @apply grid-rows-2; }
+    .flyer-cards { @apply grid-cols-2; }
+    .flyer { @apply relative flex flex-col overflow-hidden rounded-[18px] border-2 border-slate-200 bg-white p-8 text-slate-900; }
+    .flyer-a4 .flyer { min-height: 273mm; }
+    .flyer-a5 .flyer { min-height: 132mm; @apply p-6; }
+    .flyer-cards .flyer { min-height: 64mm; @apply p-4; }
+    .flyer-band { @apply absolute inset-x-0 top-0 h-2.5 bg-signature; }
+    .flyer-logo { @apply h-12 w-12; }
+    .flyer-brand { @apply font-display text-lg font-bold uppercase tracking-wide; }
+    .flyer-title { @apply mt-6 font-display text-[44px] font-extrabold leading-[1.05] tracking-tight; }
+    .flyer-sub { @apply mt-4 text-[17px] leading-7 text-slate-600; }
+    .flyer-body { @apply my-auto flex items-center justify-center gap-10 py-8; }
+    .flyer-qr { @apply h-72 w-72 shrink-0 rounded-2xl border-4 border-slate-900 p-1; }
+    .flyer-steps { @apply space-y-4 text-[17px] font-semibold; }
+    .flyer-steps li { @apply flex items-center gap-3; }
+    .flyer-steps span { @apply grid h-9 w-9 shrink-0 place-items-center rounded-full bg-signature text-white; }
+    .flyer-url { @apply mt-6 text-[17px] text-slate-700; }
+    .flyer-contact { @apply mt-1 text-[16px] font-semibold; }
+    .flyer-foot { @apply mt-3 text-[12px] text-slate-500; }
+    .flyer-a5 .flyer-title { @apply mt-4 text-[30px]; }
+    .flyer-a5 .flyer-sub { @apply mt-2 text-[14px] leading-6; }
+    .flyer-a5 .flyer-body { @apply gap-6 pt-4; }
+    .flyer-a5 .flyer-qr { @apply h-40 w-40; }
+    .flyer-a5 .flyer-steps { @apply space-y-2 text-[14px]; }
+    .flyer-a5 .flyer-steps span { @apply h-7 w-7; }
+    .flyer-a5 .flyer-url { @apply mt-3 text-[14px]; }
+    .flyer-cards .flyer-logo { @apply h-8 w-8; }
+    .flyer-cards .flyer-brand { @apply text-[12px]; }
+    .flyer-cards .flyer-title { @apply mt-2 text-[16px] leading-tight; }
+    .flyer-cards .flyer-body { @apply justify-center pt-2; }
+    .flyer-cards .flyer-qr { @apply h-28 w-28 border-2; }
+    .flyer-cards .flyer-url { @apply mt-2 text-center text-[11px]; }
+    .flyer-cards .flyer-contact { @apply text-center text-[11px]; }
+    .flyer-cards .flyer-foot { @apply hidden; }
+}
+@media print {
+    .flyer-sheet { box-shadow: none; padding: 8mm; max-width: none; }
+    .flyer { break-inside: avoid; }
+    .flyer-a4 .flyer { min-height: 277mm; }
+}

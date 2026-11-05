@@ -89,6 +89,9 @@ final class AccountController extends PortalController
     {
         $area = $this->area($request);
         $user = $this->guard->user();
+        if ($user['role'] === User::ROLE_OWNER && (bool) ($this->service('config')['app']['console_require_2fa'] ?? false)) {
+            return $this->redirectTo('/' . $area . '/account/two-factor', 'Two-step verification is required for the Owner Console and cannot be turned off.', 'error');
+        }
         if (!password_verify((string) $request->input('current_password', ''), (string) $user['password_hash'])) {
             return $this->backWithErrors('/' . $area . '/account/two-factor', ['current_password' => 'Your password is incorrect.']);
         }

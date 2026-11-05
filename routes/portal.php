@@ -86,6 +86,7 @@ return static function (Router $router, Container $container): void {
         $router->get('/plans', [PlanController::class, 'index']);
         $router->post('/plans/{id}', [PlanController::class, 'update']);
         $router->get('/audit', [ConsoleController::class, 'audit']);
+        $router->get('/flyer', [\ExamCore\Controllers\FlyerController::class, 'console']);
         $router->get('/system', [ConsoleController::class, 'system']);
         $router->post('/system/backup', [ConsoleController::class, 'backup']);
         $router->get('/system/backups/{file}', [ConsoleController::class, 'downloadBackup']);
@@ -194,6 +195,7 @@ return static function (Router $router, Container $container): void {
             $router->post('/results/students/{student}/remarks', [ResultController::class, 'remarks']);
             $router->post('/results/students/{student}/code', [ResultController::class, 'resultCode']);
 
+            $router->get('/flyer', [\ExamCore\Controllers\FlyerController::class, 'school']);
             $router->get('/settings', [SettingsController::class, 'edit']);
             $router->post('/settings', [SettingsController::class, 'update']);
             $router->post('/settings/logo', [SettingsController::class, 'logo']);

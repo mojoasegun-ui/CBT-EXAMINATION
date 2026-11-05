@@ -16,7 +16,7 @@ if (($user['role'] ?? '') === 'school_admin') {
 $nav = match (true) {
     $isConsole => [
         'Overview' => [['/console', 'dashboard', 'Dashboard']],
-        'Platform' => [['/console/schools', 'school', 'Schools'], ['/console/bank', 'library', 'Platform bank'], ['/console/plans', 'layers', 'Plans & features'], ['/console/audit', 'list-checks', 'Audit log'], ['/console/system', 'server', 'System']],
+        'Platform' => [['/console/schools', 'school', 'Schools'], ['/console/bank', 'library', 'Platform bank'], ['/console/plans', 'layers', 'Plans & features'], ['/console/flyer', 'sparkles', 'Flyer & QR'], ['/console/audit', 'list-checks', 'Audit log'], ['/console/system', 'server', 'System']],
         'Account' => [['/console/account/password', 'key', 'Password'], ['/console/account/two-factor', 'shield', 'Two-step verification']],
     ],
     $isStudentArea => [
@@ -29,7 +29,7 @@ $nav = match (true) {
         'People' => [['/school/students', 'graduation', 'Students'], ['/school/teachers', 'users', 'Teachers & staff']],
         'Academics' => [['/school/classes', 'school', 'Classes'], ['/school/subjects', 'book', 'Subjects'], ['/school/departments', 'layers', 'Departments'], ['/school/academic', 'calendar', 'Academic year'], ['/school/grading', 'sliders', 'Grading scale']],
         'Exams' => $soonExams,
-        'School' => [['/school/settings', 'palette', 'Profile & branding'], ['/school/activity', 'list-checks', 'Activity log']],
+        'School' => [['/school/settings', 'palette', 'Profile & branding'], ['/school/flyer', 'sparkles', 'Flyer & QR'], ['/school/activity', 'list-checks', 'Activity log']],
         'Account' => [['/school/account/password', 'key', 'Password'], ['/school/account/two-factor', 'shield', 'Two-step verification']],
     ],
     default => [

@@ -30,7 +30,10 @@ declare(strict_types=1);
                 </div>
                 <span class="badge badge-green badge-dot">Protected</span>
             </div>
-            <form method="post" action="<?= e(url('/' . $area . '/account/two-factor/disable')) ?>" class="flex flex-col gap-3 border-t border-line p-5 sm:flex-row sm:items-end" data-confirm="<?= $required ? 'Two-step verification is required for the Owner Console, so you will be asked to set it up again straight away.' : 'Your account will be protected by your password only.' ?>" data-confirm-title="Turn off two-step verification?" data-confirm-ok="Turn off">
+            <?php if ($required): ?>
+            <p class="border-t border-line p-5 text-sm text-muted">Two-step verification is required for the Owner Console, so it cannot be turned off here. Keep your recovery codes safe: they let you in if you lose your phone.</p>
+            <?php else: ?>
+            <form method="post" action="<?= e(url('/' . $area . '/account/two-factor/disable')) ?>" class="flex flex-col gap-3 border-t border-line p-5 sm:flex-row sm:items-end" data-confirm="Your account will be protected by your password only." data-confirm-title="Turn off two-step verification?" data-confirm-ok="Turn off">
                 <input type="hidden" name="_csrf_token" value="<?= e($csrfToken) ?>">
                 <div class="flex-1">
                     <label class="label" for="current_password">Confirm with your password to turn it off</label>
@@ -39,6 +42,7 @@ declare(strict_types=1);
                 </div>
                 <button class="btn btn-danger-soft">Turn off</button>
             </form>
+            <?php endif; ?>
         </section>
     <?php elseif ($setup !== null): ?>
         <?php if ($required): ?>
@@ -51,6 +55,7 @@ declare(strict_types=1);
                 <div class="flex flex-col items-center justify-center gap-3 border-b border-line bg-soft p-6 md:border-b-0 md:border-r">
                     <img src="<?= e($setup['qr']) ?>" alt="QR code to add <?= e($appName) ?> to your authenticator app" class="h-48 w-48 rounded-xl bg-white p-2 ring-1 ring-line">
                     <p class="text-xs text-muted">Scan with your phone camera</p>
+                    <p class="max-w-[12rem] text-center text-[11px] leading-4 text-amber-700 dark:text-amber-300">Set this up before? Delete the old <?= e($appName) ?> entry in your app first. Old codes no longer work.</p>
                 </div>
                 <div class="p-6">
                     <ol class="space-y-5 text-sm">

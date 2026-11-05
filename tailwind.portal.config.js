@@ -6,6 +6,7 @@ module.exports = {
         "./resources/views/layouts/auth.php",
         "./resources/views/layouts/exam.php",
         "./resources/views/layouts/print.php",
+        "./resources/views/shared/**/*.php",
         "./resources/views/public/**/*.php",
         "./resources/views/partials/report-card.php",
         "./public/assets/js/exam-room.js",

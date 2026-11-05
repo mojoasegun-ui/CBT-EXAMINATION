@@ -41,6 +41,13 @@ final class Request
                 $headers[$name] ??= (string) $value;
             }
         }
+        // Under FastCGI / PHP-FPM (most shared hosts, e.g. InfinityFree) these two arrive
+        // without the HTTP_ prefix and getallheaders() may not exist.
+        foreach (['CONTENT_TYPE' => 'Content-Type', 'CONTENT_LENGTH' => 'Content-Length'] as $key => $name) {
+            if (isset($_SERVER[$key]) && $_SERVER[$key] !== '') {
+                $headers[$name] ??= (string) $_SERVER[$key];
+            }
+        }
 
         $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
         $body = (string) file_get_contents('php://input');
@@ -90,7 +97,9 @@ final class Request
     /** @return array<string, mixed> */
     public function json(): array
     {
-        if (!str_contains(strtolower($this->header('content-type') ?? ''), 'application/json')) {
+        $type = strtolower($this->header('content-type') ?? '');
+        $looksJson = $type === '' && preg_match('/^\s*[\[{]/', $this->body) === 1; // header lost by a proxy
+        if (!str_contains($type, 'application/json') && !$looksJson) {
             return [];
         }
         $decoded = json_decode($this->body, true);
