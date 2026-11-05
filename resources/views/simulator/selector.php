@@ -19,137 +19,91 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
 <body class="min-h-screen bg-slate-50 text-ink antialiased">
 <a href="#main-content" class="skip-link">Skip to content</a>
 <header class="site-header sticky top-0 z-40 border-b border-white/60 bg-white/90 shadow-sm backdrop-blur">
-    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-3 sm:px-6 lg:px-8">
-        <a href="<?= e($homeUrl) ?>" class="brand inline-flex min-h-11 min-w-0 shrink items-center gap-2 rounded-xl font-display text-base font-extrabold sm:gap-3 sm:text-lg text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600" aria-label="ExamCore CBT practice home">
-            <svg class="h-8 w-8 shrink-0 sm:h-9 sm:w-9" viewBox="0 0 40 40" role="img" aria-label=""><path d="M5 8.5 20 2l15 6.5v13c0 8.4-6.1 13.2-15 16C11.1 34.7 5 29.9 5 21.5v-13Z" fill="#1E40AF"/><path d="M13 13h14M13 19h14M13 25h8" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="2.5"/></svg>
-            <span>ExamCore <span class="font-medium text-primary">CBT</span></span>
+    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-3 sm:h-[72px] sm:px-6 lg:px-8">
+        <a href="<?= e($homeUrl) ?>" class="brand inline-flex min-h-11 min-w-0 shrink items-center gap-2.5 rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600" aria-label="<?= e($appName) ?> practice home">
+            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 shadow-md shadow-blue-900/25 sm:h-11 sm:w-11"><svg class="h-6 w-6 text-white" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 6 5 13l15 7 15-7-15-7Z" fill="#fff"/><path d="M11 18v7c2.4 2.6 5.6 4 9 4s6.6-1.4 9-4v-7l-9 4.2L11 18Z" fill="#fff" opacity=".85"/><path d="M34 14v9" stroke="#fbbf24" stroke-width="2.4" stroke-linecap="round"/></svg></span>
+            <span class="min-w-0 leading-tight"><span class="block truncate font-display text-[17px] font-extrabold text-ink sm:text-xl"><?= e($appName) ?></span><span class="hidden text-xs font-medium text-slate-500 min-[380px]:block">Learn &middot; Practice &middot; Excel</span></span>
         </a>
-        <div class="flex shrink-0 items-center gap-1.5 sm:gap-3">
-            <button type="button" class="theme-toggle" aria-label="Toggle dark mode" data-theme-toggle>
-                <span class="theme-toggle__icon" aria-hidden="true">☀️</span>
+        <div class="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+            <button type="button" class="theme-toggle" aria-label="Toggle dark mode" data-theme-toggle><span class="theme-toggle__icon" aria-hidden="true">☀️</span></button>
+            <a href="<?= e(url('/practice')) ?>" class="hidden h-10 items-center rounded-full border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:border-primary hover:text-primary lg:inline-flex">Practice Centre</a>
+            <a href="<?= e(url('/student/login')) ?>" class="hidden h-10 items-center rounded-full bg-primary px-5 text-sm font-bold text-white shadow-sm transition hover:opacity-90 sm:inline-flex">Sign in</a>
+            <button type="button" class="relative grid h-11 w-11 shrink-0 place-items-center rounded-full border-2 border-white bg-gradient-to-br from-blue-100 to-blue-200 text-primary shadow-md ring-1 ring-slate-200 transition active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600" aria-label="Your practice profile" data-open-profile>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg><span class="hidden font-display text-base font-extrabold" data-avatar-letter></span><span class="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-success"></span>
             </button>
-            <details class="signin-menu relative">
-                <summary class="flex h-10 cursor-pointer list-none items-center gap-1.5 whitespace-nowrap rounded-full bg-primary px-3.5 text-sm font-bold text-white sm:px-4 shadow-sm transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 [&::-webkit-details-marker]:hidden">
-                    Sign in
-                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-                </summary>
-                <div class="absolute right-0 top-12 z-50 w-72 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
-                    <a href="<?= e(url('/student/login')) ?>" class="flex items-start gap-3 rounded-xl p-3 transition hover:bg-blue-50">
-                        <span class="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue-100 text-primary"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 10-10-5-10 5 10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></span>
-                        <span><span class="block text-sm font-bold text-ink">Student</span><span class="block text-xs leading-5 text-slate-500">Write your school exams and see your results</span></span>
-                    </a>
-                    <a href="<?= e(url('/login')) ?>" class="flex items-start gap-3 rounded-xl p-3 transition hover:bg-blue-50">
-                        <span class="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-emerald-100 text-emerald-700"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></span>
-                        <span><span class="block text-sm font-bold text-ink">Teacher or school admin</span><span class="block text-xs leading-5 text-slate-500">Manage exams, students and results</span></span>
-                    </a>
-                    <a href="<?= e(url('/check-result')) ?>" class="flex items-start gap-3 rounded-xl p-3 transition hover:bg-blue-50">
-                        <span class="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-100 text-amber-700"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
-                        <span><span class="block text-sm font-bold text-ink">Parent</span><span class="block text-xs leading-5 text-slate-500">Check your child's result with the result code</span></span>
-                    </a>
-                </div>
-            </details>
-            <button type="button" class="hidden h-10 w-10 place-items-center rounded-full sm:grid border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-primary hover:bg-blue-50 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600" aria-label="Open student profile" data-open-identity-modal>
-                <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
-            </button>
-            <span class="hidden items-center gap-2 text-xs font-semibold text-slate-600 sm:inline-flex"><span class="h-2 w-2 rounded-full bg-success"></span> Anonymous session</span>
-            <span class="hidden rounded-full bg-blue-50 px-3 py-1 text-xs font-bold uppercase tracking-[.12em] text-primary sm:inline-flex">Practice CBT</span>
-            <button type="button" class="grid h-11 w-11 place-items-center rounded-xl border border-slate-200 bg-white text-ink shadow-sm transition hover:border-primary hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 sm:hidden" aria-label="Open practice menu" aria-controls="practice-menu" aria-expanded="false" data-menu-toggle><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+            <button type="button" class="grid h-11 w-11 place-items-center rounded-2xl border border-slate-200 bg-white text-ink shadow-sm transition active:scale-95 hover:border-primary hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600" aria-label="Open menu" aria-controls="practice-menu" aria-expanded="false" data-menu-toggle><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
         </div>
     </div>
-    <nav id="practice-menu" class="mobile-menu-panel hidden sm:hidden" aria-label="Practice page menu" data-mobile-menu>
-        <div class="mb-6 flex items-center justify-between border-b border-slate-200 pb-4">
-            <div>
-                <p class="text-[10px] font-extrabold uppercase tracking-[.22em] text-primary">Menu</p>
-                <h2 class="mt-1 font-display text-xl font-bold text-ink">Explore sessions</h2>
-            </div>
-            <button type="button" class="grid h-10 w-10 place-items-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-primary hover:text-primary" aria-label="Close menu" data-menu-close>
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6 18 18M18 6 6 18"/></svg>
-            </button>
+    <nav id="practice-menu" class="mobile-menu-panel hidden" aria-label="Main menu" data-mobile-menu>
+        <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+            <p class="font-display text-lg font-extrabold text-ink"><?= e($appName) ?></p>
+            <button type="button" class="grid h-10 w-10 place-items-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-primary hover:text-primary" aria-label="Close menu" data-menu-close><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6 18 18M18 6 6 18"/></svg></button>
         </div>
-        <div class="space-y-2">
-            <a class="menu-link" href="#exam-selector" data-menu-link>Choose a practice set</a>
+        <button type="button" class="mt-4 flex w-full items-center gap-3 rounded-2xl bg-gradient-to-r from-blue-700 to-blue-600 p-3.5 text-left text-white shadow-md" data-open-profile>
+            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/20"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg></span>
+            <span class="min-w-0"><span class="block text-sm font-bold">Your practice profile</span><span class="block text-xs text-blue-100">Add your name so results carry it</span></span>
+        </button>
+        <p class="mb-1 mt-5 px-1 text-[11px] font-extrabold uppercase tracking-[.18em] text-slate-400">Practise</p>
+        <div class="space-y-1">
+            <a class="menu-link" href="#exam-selector" data-menu-link>Choose a practice exam</a>
             <a class="menu-link" href="<?= e(url('/practice')) ?>" data-menu-link>Practice Centre (by topic)</a>
+            <a class="menu-link" href="<?= e(url('/practice/mock')) ?>" data-menu-link>JAMB mock exam</a>
             <a class="menu-link" href="#how-title" data-menu-link>How it works</a>
             <?php if ($recentAttempts !== []): ?><a class="menu-link" href="#recent-title" data-menu-link>Recent practice</a><?php endif; ?>
         </div>
-        <div class="mt-6 rounded-2xl bg-gradient-to-r from-blue-50 to-amber-50 p-4">
-            <p class="text-xs font-bold uppercase tracking-[.18em] text-primary">Free practice</p>
-            <p class="mt-2 text-sm text-slate-600">No signup required. Start a new exam in seconds.</p>
+        <p class="mb-1 mt-5 px-1 text-[11px] font-extrabold uppercase tracking-[.18em] text-slate-400">Sign in</p>
+        <div class="space-y-1">
+            <a class="menu-link" href="<?= e(url('/student/login')) ?>">Student</a>
+            <a class="menu-link" href="<?= e(url('/login')) ?>">Teacher or school admin</a>
+            <a class="menu-link" href="<?= e(url('/check-result')) ?>">Parent: check a result</a>
         </div>
+        <p class="mt-6 rounded-2xl bg-gradient-to-r from-blue-50 to-amber-50 p-4 text-sm text-slate-600"><span class="block text-xs font-bold uppercase tracking-[.16em] text-primary">Free practice</span>No signup required. Start a new exam in seconds.</p>
     </nav>
 </header>
 
 <main id="main-content" tabindex="-1">
-    <section class="relative isolate min-h-[440px] overflow-hidden bg-primary text-white sm:min-h-[470px]" aria-labelledby="hero-title">
-        <div class="absolute inset-0 -z-10 overflow-hidden hero-visual-shell" role="img" aria-label="Illustration of a student practicing a computer-based exam">
-            <svg class="hero-visual-svg h-full w-full" viewBox="0 0 1600 620" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <linearGradient id="heroWash" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1E40AF"/><stop offset=".62" stop-color="#1D4ED8"/><stop offset="1" stop-color="#172554"/></linearGradient>
-                    <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#eff6ff"/></linearGradient>
-                    <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.3" fill="#fff" opacity=".15"/></pattern>
-                </defs>
-                <path fill="url(#heroWash)" d="M0 0h1600v620H0z"/><path fill="url(#dots)" d="M0 0h1600v620H0z"/>
-                <circle cx="1310" cy="170" r="260" fill="#60a5fa" opacity=".18"/><circle cx="1490" cy="500" r="330" fill="#f59e0b" opacity=".16"/>
-                <path d="M850 620c90-180 240-240 470-210s250 120 280 210H850Z" fill="#0f172a" opacity=".24"/>
-                <g class="hero-screen-card" transform="translate(930 104) rotate(3 250 190)">
-                    <rect x="8" y="10" width="500" height="340" rx="25" fill="#0b1c56" opacity=".3"/>
-                    <rect width="500" height="340" rx="24" fill="#dbeafe"/><rect x="12" y="12" width="476" height="316" rx="17" fill="url(#screen)"/>
-                    <path d="M12 30a18 18 0 0 1 18-18h440a18 18 0 0 1 18 18v34H12V30Z" fill="#f1f5f9"/>
-                    <circle cx="36" cy="35" r="5" fill="#f87171"/><circle cx="54" cy="35" r="5" fill="#fbbf24"/><circle cx="72" cy="35" r="5" fill="#34d399"/>
-                    <rect x="34" y="86" width="286" height="17" rx="8" fill="#0f172a"/><rect x="34" y="119" width="390" height="10" rx="5" fill="#cbd5e1"/><rect x="34" y="139" width="320" height="10" rx="5" fill="#cbd5e1"/>
-                    <g font-family="Arial,sans-serif" font-size="13" font-weight="700" text-anchor="middle"><circle cx="49" cy="190" r="15" fill="#dbeafe"/><text x="49" y="195" fill="#1e40af">A</text><circle cx="49" cy="230" r="15" fill="#1e40af"/><text x="49" y="235" fill="#fff">B</text><circle cx="49" cy="270" r="15" fill="#dbeafe"/><text x="49" y="275" fill="#1e40af">C</text><circle cx="49" cy="310" r="15" fill="#dbeafe"/><text x="49" y="315" fill="#1e40af">D</text></g>
-                    <rect x="80" y="181" width="330" height="9" rx="4" fill="#94a3b8"/><rect x="80" y="221" width="290" height="9" rx="4" fill="#64748b"/><rect x="80" y="261" width="350" height="9" rx="4" fill="#94a3b8"/><rect x="80" y="301" width="230" height="9" rx="4" fill="#94a3b8"/>
-                    <path d="M-36 350h572l-44 35H8l-44-35Z" fill="#cbd5e1"/><path d="M180 356h136l-13 18h-110l-13-18Z" fill="#94a3b8"/>
-                </g>
-                <g class="hero-timer-card" transform="translate(1322 285)"><rect width="176" height="92" rx="19" fill="#fff"/><circle cx="27" cy="27" r="7" fill="#10b981"/><text x="46" y="31" font-family="Arial,sans-serif" font-size="11" fill="#64748b" font-weight="700">PRACTICE SESSION</text><text x="21" y="65" font-family="Arial,sans-serif" font-size="23" fill="#0f172a" font-weight="700">08:42</text><path d="M115 62h38" stroke="#f59e0b" stroke-width="6" stroke-linecap="round"/></g>
-            </svg>
-        </div>
-        <div class="absolute inset-0 -z-10 bg-gradient-to-r from-blue-950/95 via-primary/90 to-blue-950/75 lg:to-primary/10" aria-hidden="true"></div>
-        <div class="mx-auto min-h-[440px] max-w-7xl px-4 py-14 sm:min-h-[470px] sm:px-6 lg:px-8">
-            <div class="hero-layout">
-                <div class="max-w-2xl motion-reveal" data-reveal>
-                    <p class="hero-pill mb-5 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-blue-50 backdrop-blur"><span class="h-2 w-2 rounded-full bg-amber-400"></span> Free practice · no account needed</p>
-                    <h1 id="hero-title" class="max-w-2xl font-display text-4xl font-extrabold leading-[1.08] text-white sm:text-5xl lg:text-6xl">Practice WAEC, NECO &amp; JAMB CBT. <span class="text-amber-300">Free, no login required.</span></h1>
-                    <p class="mt-5 max-w-xl text-base leading-7 text-blue-50 sm:text-lg">Choose a subject and year, work through one question at a time, and see your score with explanations when you finish.</p>
-                    <div class="hero-metrics mt-8 grid max-w-xl gap-3 sm:grid-cols-3">
-                        <div><span>1400+</span><small>Practice questions</small></div>
-                        <div><span>18</span><small>Subjects</small></div>
-                        <div><span>3</span><small>Exam boards</small></div>
-                    </div>
-                    <div class="mt-8 flex flex-wrap items-center gap-3">
-                        <a href="#exam-selector" class="hero-main-action inline-flex min-h-12 items-center justify-center gap-3 rounded-xl bg-accent px-6 py-3 font-bold text-ink shadow-lg transition duration-200 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Choose a practice exam <span aria-hidden="true">↓</span></a>
-                        <a href="<?= e(url('/practice')) ?>" class="hero-secondary-action inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/5 px-5 py-3 font-semibold text-white backdrop-blur-sm transition duration-200 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Practice Centre</a>
-                        <a href="#how-title" class="hero-secondary-action inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/5 px-5 py-3 font-semibold text-white backdrop-blur-sm transition duration-200 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">How it works</a>
-                    </div>
-                </div>
-
-                <div class="hero-visual-stack motion-reveal" data-reveal aria-hidden="true">
-                    <div class="hero-float-card hero-float-card-1">
-                        <div class="hero-float-label">Performance</div>
-                        <div class="hero-float-score">89%</div>
-                        <div class="hero-float-bars">
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </div>
-                    </div>
-                    <div class="hero-float-card hero-float-card-2">
-                        <div class="hero-float-label">Active boards</div>
-                        <div class="hero-float-row"><span>JAMB</span><strong>2024</strong></div>
-                        <div class="hero-float-row"><span>WAEC</span><strong>2023</strong></div>
-                        <div class="hero-float-row"><span>NECO</span><strong>2022</strong></div>
-                    </div>
-                    <div class="hero-float-badge">
-                        <span class="hero-float-badge__dot"></span>
-                        3D study mode
-                    </div>
+    <?php $heroPhoto = is_file(dirname(__DIR__, 3) . '/public/assets/images/hero-student.jpg'); ?>
+    <section class="relative isolate overflow-hidden bg-gradient-to-br from-blue-900 via-primary to-blue-700 text-white" aria-labelledby="hero-title">
+        <?php if ($heroPhoto): ?><img src="<?= e($assetRoot) ?>/images/hero-student.jpg" alt="" class="absolute inset-y-0 right-0 -z-10 h-full w-full object-cover object-right opacity-60 sm:w-3/5" fetchpriority="high"><div class="absolute inset-0 -z-10 bg-gradient-to-r from-blue-950 via-blue-900/85 to-transparent" aria-hidden="true"></div><?php endif; ?>
+        <div class="absolute -right-24 -top-24 -z-10 h-80 w-80 rounded-full bg-blue-400/20 blur-3xl" aria-hidden="true"></div>
+        <div class="absolute -bottom-32 left-1/3 -z-10 h-72 w-72 rounded-full bg-amber-400/15 blur-3xl" aria-hidden="true"></div>
+        <div class="mx-auto grid max-w-7xl items-center gap-6 px-4 pb-24 pt-9 sm:px-6 sm:pt-14 lg:grid-cols-[1.15fr_.85fr] lg:px-8 lg:pb-28 lg:pt-16">
+            <div class="motion-reveal" data-reveal>
+                <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-blue-50 backdrop-blur sm:text-sm"><span class="h-2 w-2 rounded-full bg-amber-400"></span> Free practice · no account needed</p>
+                <h1 id="hero-title" class="font-display text-[2rem] font-extrabold leading-[1.1] sm:text-5xl lg:text-6xl">Practice WAEC, NECO &amp; JAMB. <span class="text-amber-300">Free, no login.</span></h1>
+                <p class="mt-4 max-w-xl text-[15px] leading-7 text-blue-50 sm:text-lg">Choose a subject and year, work through one question at a time, and see your score with <span class="font-semibold text-amber-300">explanations</span> when you finish.</p>
+                <div class="mt-7 flex flex-col gap-3 sm:flex-row">
+                    <a href="#exam-selector" class="inline-flex min-h-14 items-center justify-center gap-3 rounded-2xl bg-accent px-7 text-base font-extrabold text-ink shadow-lg shadow-black/20 transition active:scale-[.98] hover:bg-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 5 11 7-11 7V5Z" fill="currentColor"/></svg> Choose a practice exam <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+                    <a href="#how-title" class="inline-flex min-h-14 items-center justify-center gap-3 rounded-2xl border border-white/30 bg-white/10 px-6 text-base font-bold text-white backdrop-blur transition active:scale-[.98] hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h7a3 3 0 0 1 3 3v14a2 2 0 0 0-2-2H2V4ZM22 4h-7a3 3 0 0 0-3 3v14a2 2 0 0 1 2-2h8V4Z"/></svg> How it works</a>
                 </div>
             </div>
+            <div class="relative mx-auto hidden w-full max-w-md lg:block" aria-hidden="true">
+                <svg viewBox="0 0 420 360" class="w-full drop-shadow-2xl" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="bkA" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#60a5fa"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient>
+                        <linearGradient id="bkB" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#1e3a8a"/></linearGradient>
+                        <linearGradient id="capT" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#334155"/><stop offset="1" stop-color="#0f172a"/></linearGradient>
+                    </defs>
+                    <ellipse cx="210" cy="322" rx="170" ry="22" fill="#0b1b4d" opacity=".35"/>
+                    <path d="M40 270 210 310 380 270v-34L210 276 40 236Z" fill="url(#bkB)"/><path d="M40 236 210 276 380 236 210 196Z" fill="#fff"/><path d="M60 242 210 277 360 242" fill="none" stroke="#cbd5e1" stroke-width="3"/>
+                    <path d="M70 214 210 246 350 214v-30L210 216 70 184Z" fill="url(#bkA)"/><path d="M70 184 210 216 350 184 210 152Z" fill="#fff"/><path d="M86 190 210 218 334 190" fill="none" stroke="#cbd5e1" stroke-width="3"/>
+                    <path d="M120 128v38c20 16 54 26 90 26s70-10 90-26v-38l-90 36-90-36Z" fill="#1e293b"/>
+                    <path d="M210 52 70 106l140 54 140-54-140-54Z" fill="url(#capT)"/><path d="M210 52 70 106l140 54" fill="none" stroke="#475569" stroke-width="2"/>
+                    <path d="M210 106 332 112v52" fill="none" stroke="#f59e0b" stroke-width="5" stroke-linecap="round"/><circle cx="332" cy="112" r="6" fill="#fbbf24"/><path d="M332 118v44" stroke="#f59e0b" stroke-width="9" stroke-linecap="round"/><path d="M326 160h12l4 22h-20Z" fill="#f59e0b"/>
+                </svg>
+            </div>
         </div>
-        <div class="pointer-events-none absolute bottom-0 right-[5%] hidden h-12 w-72 rounded-t-full bg-white/10 blur-2xl lg:block" aria-hidden="true"></div>
     </section>
 
-    <section id="exam-selector" class="relative z-10 mx-auto -mt-7 max-w-7xl px-4 pb-14 sm:px-6 lg:px-8" aria-labelledby="selector-title">
+    <section class="relative z-10 mx-auto -mt-16 max-w-7xl px-4 sm:px-6 lg:-mt-20 lg:px-8" aria-label="At a glance">
+        <div class="grid grid-cols-3 gap-2.5 sm:gap-4">
+            <div class="rounded-2xl bg-white p-3 shadow-xl ring-1 ring-slate-200/70 sm:p-5"><span class="mb-2 grid h-9 w-9 place-items-center rounded-full bg-blue-600 text-white sm:h-11 sm:w-11"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01"/></svg></span><p class="font-display text-xl font-extrabold text-ink sm:text-3xl">1,800+</p><p class="text-[11px] font-medium leading-tight text-slate-500 sm:text-sm">Practice questions</p></div>
+            <div class="rounded-2xl bg-white p-3 shadow-xl ring-1 ring-slate-200/70 sm:p-5"><span class="mb-2 grid h-9 w-9 place-items-center rounded-full bg-violet-600 text-white sm:h-11 sm:w-11"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span><p class="font-display text-xl font-extrabold text-ink sm:text-3xl">22</p><p class="text-[11px] font-medium leading-tight text-slate-500 sm:text-sm">Years, 2005–2026</p></div>
+            <div class="rounded-2xl bg-white p-3 shadow-xl ring-1 ring-slate-200/70 sm:p-5"><span class="mb-2 grid h-9 w-9 place-items-center rounded-full bg-emerald-600 text-white sm:h-11 sm:w-11"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12 5 5L20 6"/></svg></span><p class="font-display text-xl font-extrabold text-ink sm:text-3xl">3</p><p class="text-[11px] font-medium leading-tight text-slate-500 sm:text-sm">Exam boards</p></div>
+        </div>
+    </section>
+
+    <section id="exam-selector" class="relative z-10 mx-auto mt-6 max-w-7xl px-4 pb-14 sm:px-6 lg:px-8" aria-labelledby="selector-title">
         <div class="motion-reveal rounded-2xl bg-white p-5 shadow-xl ring-1 ring-slate-200/70 sm:p-8 lg:p-10" data-reveal>
             <div class="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div><p class="text-sm font-extrabold uppercase tracking-[.15em] text-primary">Your practice session</p><h2 id="selector-title" class="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">Build your exam in three steps</h2></div>

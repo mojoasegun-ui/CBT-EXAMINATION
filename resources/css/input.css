@@ -33,3 +33,10 @@
 /* Fit the screen, always: no sideways page scroll (installed app has no browser chrome to fix it). */
 html { overflow-x: hidden; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body { min-width: 0; }
+
+/* Premium home: full-height side drawer on every screen size, with a dimmed backdrop. */
+.mobile-menu-panel{top:0;right:0;bottom:0;height:100dvh;width:min(22rem,88vw);overflow-y:auto;border-radius:1.5rem 0 0 1.5rem;border-width:0 0 0 1px;transform:translateX(105%);padding:1.1rem 1.1rem 1.5rem;box-shadow:-24px 0 60px rgba(15,23,42,.22)}
+.mobile-menu-panel.is-open{transform:translateX(0)}
+body.menu-open::before{content:"";position:fixed;inset:0;z-index:30;background:rgba(2,6,23,.5);backdrop-filter:blur(2px)}
+.mobile-menu-panel .menu-link{display:flex;min-height:3rem;align-items:center;border-radius:.9rem;padding:0 .9rem;font-weight:600}
+@media (prefers-reduced-motion:reduce){.mobile-menu-panel{transition:none}}

@@ -403,6 +403,35 @@
         });
     });
 
+    // Header avatar and drawer card: always open the profile card, even before an exam is chosen.
+    const PROFILE_KEY = "examcore-profile";
+    const paintAvatar = (name) => {
+        document.querySelectorAll("[data-avatar-letter]").forEach((slot) => {
+            const letter = (name || "").trim().charAt(0).toUpperCase();
+            slot.textContent = letter;
+            slot.classList.toggle("hidden", letter === "");
+            slot.previousElementSibling?.classList.toggle("hidden", letter !== "");
+        });
+    };
+    try {
+        const saved = JSON.parse(localStorage.getItem(PROFILE_KEY) || "null");
+        if (saved && saved.name) {
+            if (identityName) identityName.value = saved.name;
+            if (identityEmail) identityEmail.value = saved.email || "";
+            syncStudentProfile();
+            paintAvatar(saved.name);
+        }
+    } catch (error) {
+        /* private mode: the profile simply is not remembered */
+    }
+    document.querySelectorAll("[data-open-profile]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+            event.preventDefault();
+            document.querySelector("[data-menu-close]")?.click();
+            openIdentityModal();
+        });
+    });
+
     modalCloseButtons.forEach((button) => {
         button.addEventListener("click", closeIdentityModal);
     });
@@ -418,6 +447,17 @@
             studentEmailHiddenInput.value = email;
         }
         if (!validateIdentity()) {
+            return;
+        }
+        try {
+            localStorage.setItem(PROFILE_KEY, JSON.stringify({ name, email }));
+        } catch (error) {
+            /* ignore */
+        }
+        paintAvatar(name);
+        if (!hasSelection()) {
+            closeIdentityModal();
+            setStatus("Profile saved. Choose a practice set to begin.");
             return;
         }
         closeIdentityModal();
