@@ -197,6 +197,8 @@ final class Application
         $scheduler = new Scheduler($root . '/storage/cache/scheduler.json', $services->get(Logger::class));
         $scheduler->every(60, 'attempts:expire', static fn (bool $web): string
             => 'auto-submitted ' . $services->get(AttemptService::class)->expireOverdue(120, $web ? 25 : 200) . ' overdue attempt(s)');
+        $scheduler->every(120, 'practice:expire', static fn (bool $web): string
+            => 'auto-submitted ' . $services->get(\ExamCore\Services\PracticeService::class)->expireOverdue($web ? 15 : 200) . ' mock exam(s)');
         $scheduler->every(60, 'sittings:expire', static fn (bool $web): string
             => 'auto-submitted ' . $services->get(\ExamCore\Services\SittingService::class)->expireOverdue($web ? 25 : 500) . ' sitting(s)');
         $scheduler->every(60, 'queue:work', static fn (bool $web): string

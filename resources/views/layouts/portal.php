@@ -22,6 +22,7 @@ $nav = match (true) {
     $isStudentArea => [
         'Overview' => [['/student', 'dashboard', 'My dashboard']],
         'Exams' => [['/student', 'calendar', 'My exams'], ['/student/results', 'chart', 'My results']],
+        'Practice' => [['/practice', 'sparkles', 'Practice Centre'], ['/practice/progress', 'activity', 'My practice progress']],
         'Account' => [['/student/account/password', 'key', 'Password']],
     ],
     ($user['role'] ?? '') === 'school_admin' => [

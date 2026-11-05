@@ -214,6 +214,17 @@ return static function (Router $router, Container $container): void {
         });
     });
 
+    // ---- Practice Centre (open to everyone; progress follows the student or the device) ------------
+    $router->get('/practice', [\ExamCore\Controllers\PracticeController::class, 'home']);
+    $router->get('/practice/subject/{slug}', [\ExamCore\Controllers\PracticeController::class, 'subject']);
+    $router->get('/practice/mock', [\ExamCore\Controllers\PracticeController::class, 'mock']);
+    $router->get('/practice/progress', [\ExamCore\Controllers\PracticeController::class, 'progress']);
+    $router->post('/practice/start', [\ExamCore\Controllers\PracticeController::class, 'start']);
+    $router->get('/practice/s/{token}', [\ExamCore\Controllers\PracticeController::class, 'run']);
+    $router->post('/practice/s/{token}/sync', [\ExamCore\Controllers\PracticeController::class, 'sync']);
+    $router->post('/practice/s/{token}/submit', [\ExamCore\Controllers\PracticeController::class, 'submit']);
+    $router->get('/practice/s/{token}/result', [\ExamCore\Controllers\PracticeController::class, 'result']);
+
     // ---- Public: result verification (QR) and parent result checker ---------------------------
     $router->get('/verify/{token}', [VerifyController::class, 'verify']);
     $router->get('/check-result', [VerifyController::class, 'checkForm']);

@@ -92,6 +92,16 @@
                 return;
             }
             form.dataset.submitting = "1";
+            // Disabled buttons are left out of the form data, so keep the tapped button's name/value (e.g. which topic).
+            const tapped = event.submitter;
+            if (tapped && tapped.name && !form.querySelector(`input[type="hidden"][data-submitter]`)) {
+                const keep = document.createElement("input");
+                keep.type = "hidden";
+                keep.name = tapped.name;
+                keep.value = tapped.value;
+                keep.setAttribute("data-submitter", "");
+                form.appendChild(keep);
+            }
             $$('button[type="submit"], button:not([type])', form).forEach((button) => {
                 button.disabled = true;
                 button.setAttribute("aria-busy", "true");

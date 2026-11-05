@@ -68,6 +68,7 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
         </div>
         <div class="space-y-2">
             <a class="menu-link" href="#exam-selector" data-menu-link>Choose a practice set</a>
+            <a class="menu-link" href="<?= e(url('/practice')) ?>" data-menu-link>Practice Centre (by topic)</a>
             <a class="menu-link" href="#how-title" data-menu-link>How it works</a>
             <?php if ($recentAttempts !== []): ?><a class="menu-link" href="#recent-title" data-menu-link>Recent practice</a><?php endif; ?>
         </div>
@@ -117,6 +118,7 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
                     </div>
                     <div class="mt-8 flex flex-wrap items-center gap-3">
                         <a href="#exam-selector" class="hero-main-action inline-flex min-h-12 items-center justify-center gap-3 rounded-xl bg-accent px-6 py-3 font-bold text-ink shadow-lg transition duration-200 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Choose a practice exam <span aria-hidden="true">↓</span></a>
+                        <a href="<?= e(url('/practice')) ?>" class="hero-secondary-action inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/5 px-5 py-3 font-semibold text-white backdrop-blur-sm transition duration-200 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Practice Centre</a>
                         <a href="#how-title" class="hero-secondary-action inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/5 px-5 py-3 font-semibold text-white backdrop-blur-sm transition duration-200 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">How it works</a>
                     </div>
                 </div>

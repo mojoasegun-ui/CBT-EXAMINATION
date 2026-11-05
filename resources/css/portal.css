@@ -373,3 +373,11 @@ img, svg, video, canvas { max-width: 100%; }
     .a4 { padding: 14px; min-height: 0; }
     .rc-scroll { -webkit-overflow-scrolling: touch; }
 }
+
+/* ---- Practice Centre: instant feedback on options and palette ------------------------------------------ */
+.xr-opt[data-state="right"] { border-color: rgb(16 185 129); background: rgb(16 185 129 / .09); }
+.xr-opt[data-state="right"] .xr-opt-letter { background: rgb(16 185 129); border-color: transparent; color: #fff; }
+.xr-opt[data-state="wrong"] { border-color: rgb(239 68 68); background: rgb(239 68 68 / .08); }
+.xr-opt[data-state="wrong"] .xr-opt-letter { background: rgb(239 68 68); border-color: transparent; color: #fff; }
+.xr-opt:disabled { cursor: default; }
+.xr-pal button.is-wrong { background: rgb(239 68 68); border-color: transparent; color: #fff; }
