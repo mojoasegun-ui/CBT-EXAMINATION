@@ -209,7 +209,12 @@ final class PushService
         if ($subs === []) {
             return;
         }
-        $multi = curl_multi_init();
+        // Some shared hosts disable curl_multi_*; then send one by one (capped so a request stays short).
+        $parallel = function_exists('curl_multi_init') && function_exists('curl_multi_exec');
+        $multi = $parallel ? curl_multi_init() : null;
+        if (!$parallel) {
+            $subs = array_slice($subs, 0, 40);
+        }
         $handles = [];
         $sentText = [];
         $tokens = [];
@@ -225,15 +230,21 @@ final class PushService
             $headers = $body !== null ? [...$headers, 'Content-Encoding: aes128gcm', 'Content-Type: application/octet-stream', 'Content-Length: ' . strlen($body)] : [...$headers, 'Content-Length: 0'];
             $ch = curl_init((string) $sub['endpoint']);
             curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => $body ?? '', CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 8, CURLOPT_CONNECTTIMEOUT => 5, CURLOPT_HTTPHEADER => $headers]);
-            curl_multi_add_handle($multi, $ch);
+            if ($parallel) {
+                curl_multi_add_handle($multi, $ch);
+            } else {
+                curl_exec($ch);
+            }
             $handles[(int) $sub['id']] = [$ch, $sub, $body !== null];
         }
-        do {
-            $status = curl_multi_exec($multi, $active);
-            if ($active) {
-                curl_multi_select($multi, 1.0);
-            }
-        } while ($active && $status === CURLM_OK);
+        if ($parallel) {
+            do {
+                $status = curl_multi_exec($multi, $active);
+                if ($active) {
+                    curl_multi_select($multi, 1.0);
+                }
+            } while ($active && $status === CURLM_OK);
+        }
         foreach ($handles as $id => [$ch, $sub, $withText]) {
             $code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
             $ok = $code >= 200 && $code < 300;
@@ -241,10 +252,14 @@ final class PushService
             if ($ok && $withText) {
                 $this->notes->markDeliveredFor($sub['user_id'] !== null ? (int) $sub['user_id'] : null, $sub['guest_key'] ?? null);
             }
-            curl_multi_remove_handle($multi, $ch);
+            if ($parallel) {
+                curl_multi_remove_handle($multi, $ch);
+            }
             curl_close($ch);
         }
-        curl_multi_close($multi);
+        if ($parallel) {
+            curl_multi_close($multi);
+        }
         unset($sentText);
     }
 }
