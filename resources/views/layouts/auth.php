@@ -40,7 +40,7 @@ $slides = $isConsole
         </div>
 
         <footer class="flex flex-wrap items-center justify-between gap-3 text-xs text-subtle">
-            <span class="inline-flex items-center gap-1.5"><?= icon('lock', 'h-3.5 w-3.5') ?> Secure sign-in · accounts lock after repeated failed attempts</span>
+            <span class="inline-flex items-center gap-1.5"><?= icon('lock', 'h-3.5 w-3.5') ?> Secure sign-in · accounts lock after repeated failed attempts · <a class="underline" href="<?= e(url('/privacy')) ?>">Privacy</a></span>
             <span>&copy; <?= date('Y') ?> <?= e($appName) ?></span>
         </footer>
     </main>

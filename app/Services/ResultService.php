@@ -46,14 +46,68 @@ final class ResultService
             ->execute([json_encode($settings), gmdate('Y-m-d H:i:s'), $schoolId]);
     }
 
+    /** @var array<int, array{bands: list<array<string,mixed>>, settings: array<string,mixed>}|null> */
+    private array $frozenCache = [];
+
+    /**
+     * The grading bands and report settings a term was issued with, or null when the term still follows the school's
+     * live rules (it is the current term, or nobody has frozen it yet).
+     *
+     * @return array{bands: list<array<string,mixed>>, settings: array<string,mixed>}|null
+     */
+    public function frozenRules(?int $termId): ?array
+    {
+        if ($termId === null || $termId < 1) {
+            return null;
+        }
+        if (!array_key_exists($termId, $this->frozenCache)) {
+            $st = $this->pdo()->prepare('SELECT snapshot FROM ' . $this->t('terms') . ' WHERE id = ? AND snapshot IS NOT NULL');
+            $st->execute([$termId]);
+            $decoded = json_decode((string) $st->fetchColumn(), true);
+            $this->frozenCache[$termId] = is_array($decoded) && isset($decoded['bands'], $decoded['settings']) ? $decoded : null;
+        }
+        return $this->frozenCache[$termId];
+    }
+
+    /** Copy today's grading bands and report settings into the term. Does nothing if it is already frozen. */
+    public function freezeTerm(int $schoolId, int $termId): bool
+    {
+        $st = $this->pdo()->prepare('SELECT report_settings FROM ' . $this->t('schools') . ' WHERE id = ?');
+        $st->execute([$schoolId]);
+        $settings = $this->settings(['report_settings' => $st->fetchColumn() ?: '']);
+        $bands = array_map(static fn (array $b): array => ['grade' => $b['grade'], 'min_score' => $b['min_score'], 'max_score' => $b['max_score'], 'remark' => $b['remark'], 'is_pass' => $b['is_pass']], $this->grading->all($schoolId));
+        $snapshot = json_encode(['bands' => $bands, 'settings' => array_intersect_key($settings, array_flip(['ca_weight', 'exam_weight', 'principal_name', 'next_term_begins', 'show_position']))], JSON_THROW_ON_ERROR);
+        $up = $this->pdo()->prepare('UPDATE ' . $this->t('terms') . ' SET snapshot = ?, frozen_at = ? WHERE id = ? AND school_id = ? AND snapshot IS NULL');
+        $up->execute([$snapshot, gmdate('Y-m-d H:i:s'), $termId, $schoolId]);
+        unset($this->frozenCache[$termId]);
+        return $up->rowCount() > 0;
+    }
+
+    /**
+     * Freeze terms that are over: every past term, and the current term once 30 days have passed since it ended.
+     * Safe to run any time; frozen terms are never touched again.
+     */
+    public function freezeEndedTerms(): int
+    {
+        $today = gmdate('Y-m-d');
+        $st = $this->pdo()->prepare('SELECT id, school_id FROM ' . $this->t('terms') . ' WHERE snapshot IS NULL AND ends_on IS NOT NULL
+            AND ((is_current = 0 AND ends_on < ?) OR (is_current = 1 AND ends_on < ?)) LIMIT 500');
+        $st->execute([$today, gmdate('Y-m-d', time() - 30 * 86400)]);
+        $n = 0;
+        foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $term) {
+            $n += $this->freezeTerm((int) $term['school_id'], (int) $term['id']) ? 1 : 0;
+        }
+        return $n;
+    }
+
     /** @return array{grade:string, remark:string, pass:bool} */
-    public function grade(int $schoolId, ?float $percent): array
+    public function grade(int $schoolId, ?float $percent, ?array $bands = null): array
     {
         if ($percent === null) {
             return ['grade' => '—', 'remark' => '', 'pass' => false];
         }
-        $this->bands[$schoolId] ??= $this->grading->all($schoolId);
-        foreach ($this->bands[$schoolId] as $band) {
+        $bands ??= ($this->bands[$schoolId] ??= $this->grading->all($schoolId));
+        foreach ($bands as $band) {
             if ($percent >= (float) $band['min_score'] - 0.0001) {
                 return ['grade' => (string) $band['grade'], 'remark' => (string) $band['remark'], 'pass' => (bool) $band['is_pass']];
             }
@@ -103,13 +157,14 @@ final class ResultService
             WHERE s.exam_id = ? AND s.school_id = ? AND s.status <> \'in_progress\' ORDER BY s.percent DESC, u.name');
         $st->execute([(int) $exam['id'], $schoolId]);
         $rows = $st->fetchAll(PDO::FETCH_ASSOC);
+        $frozenBands = $this->frozenRules((int) ($exam['term_id'] ?? 0))['bands'] ?? null;
         $ranks = self::rank(array_map(static fn ($r) => (float) $r['percent'], array_column($rows, null, 'id')));
         $passMark = (float) ($exam['settings']['pass_mark'] ?? 50);
         $subjects = array_column($exam['papers'], 'subject');
         $dist = [];
         foreach ($rows as &$r) {
             $r['position'] = $ranks[$r['id']];
-            $r['grade'] = $this->grade($schoolId, (float) $r['percent']);
+            $r['grade'] = $this->grade($schoolId, (float) $r['percent'], $frozenBands);
             $r['passed'] = (float) $r['percent'] >= $passMark;
             $r['papers'] = [];
             foreach (json_decode((string) $r['breakdown'], true) ?: [] as $b) {
@@ -120,7 +175,7 @@ final class ResultService
         }
         unset($r);
         $percents = array_map(static fn ($r) => (float) $r['percent'], $rows);
-        $order = array_column($this->bands[$schoolId] ?? $this->grading->all($schoolId), 'grade');
+        $order = array_column($frozenBands ?? ($this->bands[$schoolId] ?? $this->grading->all($schoolId)), 'grade');
         $distribution = [];
         foreach ($order as $g) {
             $distribution[] = ['label' => $g, 'count' => $dist[$g] ?? 0];
@@ -172,6 +227,12 @@ final class ResultService
      */
     public function classSheet(int $schoolId, int $classId, int $termId, array $settings, bool $releasedOnly): array
     {
+        // A past term is computed with the rules it was issued with, not today's.
+        $frozen = $this->frozenRules($termId);
+        if ($frozen !== null) {
+            $settings = $frozen['settings'] + $settings;
+        }
+        $frozenBands = $frozen['bands'] ?? null;
         $st = $this->pdo()->prepare('SELECT u.id, u.name, sp.admission_no, sp.gender, sp.photo_path, sp.result_code FROM ' . $this->t('student_profiles') . ' sp
             JOIN ' . $this->t('users') . ' u ON u.id = sp.user_id WHERE sp.school_id = ? AND sp.class_id = ? AND sp.status = \'active\' ORDER BY u.name');
         $st->execute([$schoolId, $classId]);
@@ -218,14 +279,14 @@ final class ResultService
                     default => $ca ?? $ex,
                 };
                 $s['subjects'][$sub] = ['ca' => $ca !== null ? round($ca, 1) : null, 'exam' => $ex !== null ? round($ex, 1) : null, 'total' => $total !== null ? round($total, 1) : null]
-                    + $this->grade($schoolId, $total !== null ? round($total, 1) : null);
+                    + $this->grade($schoolId, $total !== null ? round($total, 1) : null, $frozenBands);
                 $totals[$sub][$id] = $total !== null ? round($total, 1) : null;
             }
             $taken = array_values(array_filter(array_column($s['subjects'], 'total'), static fn ($v) => $v !== null));
             $s['count'] = count($taken);
             $s['sum'] = round(array_sum($taken), 1);
             $s['average'] = $taken ? round(array_sum($taken) / count($taken), 1) : null;
-            $s['overall'] = $this->grade($schoolId, $s['average']);
+            $s['overall'] = $this->grade($schoolId, $s['average'], $frozenBands);
             unset($s['marks']);
         }
         unset($s);
@@ -262,7 +323,8 @@ final class ResultService
     public function card(array $school, array $student, array $term, bool $releasedOnly, ?array $sheet = null): array
     {
         $schoolId = (int) $school['id'];
-        $settings = $this->settings($school);
+        $frozen = $this->frozenRules((int) $term['id']);
+        $settings = ($frozen['settings'] ?? []) + $this->settings($school);
         $sheet ??= $student['class_id'] ? $this->classSheet($schoolId, (int) $student['class_id'], (int) $term['id'], $settings, $releasedOnly) : ['subjects' => [], 'students' => [], 'size' => 0, 'classAvg' => []];
         $row = array_values(array_filter($sheet['students'], static fn ($s) => (int) $s['id'] === (int) $student['id']))[0] ?? null;
         $token = self::token('r', (int) $student['id'], (int) $term['id']);
@@ -270,7 +332,8 @@ final class ResultService
             'school' => $school, 'student' => $student, 'term' => $term, 'settings' => $settings, 'sheet' => $sheet, 'row' => $row,
             'remarks' => $this->remarks((int) $term['id'], (int) $student['id']), 'code' => $this->resultCode($schoolId, (int) $student['id']),
             'verify' => url('/verify/' . $token), 'qr' => self::qr(url('/verify/' . $token)),
-            'bands' => $this->bands[$schoolId] ??= $this->grading->all($schoolId),
+            'bands' => $frozen['bands'] ?? ($this->bands[$schoolId] ??= $this->grading->all($schoolId)),
+            'frozen' => $frozen !== null,
         ];
     }
 
@@ -293,7 +356,7 @@ final class ResultService
         $out = [];
         foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) {
             $r['visible'] = self::released($r);
-            $r['grade'] = $r['visible'] ? $this->grade($schoolId, (float) $r['percent']) : null;
+            $r['grade'] = $r['visible'] ? $this->grade($schoolId, (float) $r['percent'], $this->frozenRules((int) ($r['term_id'] ?? 0))['bands'] ?? null) : null;
             $out[] = $r;
         }
         return $out;

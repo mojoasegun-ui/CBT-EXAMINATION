@@ -93,4 +93,46 @@ HTML;
 
         $this->mailer->send($email, $student, 'Your result: ' . $examTitle, $html, $text);
     }
+
+    /**
+     * Password recovery email: one button per school account behind the address.
+     *
+     * @param list<array{school:string,url:string}> $links
+     */
+    public function sendPasswordReset(string $to, string $name, array $links): void
+    {
+        if (!$this->mailer->enabled() || $links === [] || filter_var($to, FILTER_VALIDATE_EMAIL) === false) {
+            return;
+        }
+        $app = e($this->appName);
+        $hello = e($name !== '' ? explode(' ', trim($name))[0] : 'there');
+        $buttons = '';
+        $plain = '';
+        foreach ($links as $link) {
+            $school = e($link['school']);
+            $url = e($link['url']);
+            $buttons .= '<div style="margin:14px 0;"><div style="font-size:13px;color:#475569;margin-bottom:6px;">' . $school . '</div>'
+                . '<a href="' . $url . '" style="display:inline-block;background:#1e40af;color:#ffffff;text-decoration:none;font-weight:700;font-size:15px;padding:13px 26px;border-radius:12px;">Choose a new password</a></div>';
+            $plain .= $link['school'] . ': ' . $link['url'] . "\n";
+        }
+        $html = <<<HTML
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Reset your password</title></head>
+<body style="margin:0;padding:0;background:#eef2f7;font-family:Arial,Helvetica,sans-serif;color:#0f172a;">
+  <div style="max-width:560px;margin:28px auto;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 10px 30px rgba(15,23,42,.10);">
+    <div style="background:linear-gradient(135deg,#1e3a8a,#1e40af 55%,#2563eb);padding:26px 30px;color:#ffffff;">
+      <div style="font-size:19px;font-weight:700;">{$app}</div>
+      <h1 style="margin:18px 0 4px;font-size:24px;line-height:1.25;">Reset your password</h1>
+    </div>
+    <div style="padding:28px 30px;">
+      <p style="margin:0 0 12px;font-size:16px;line-height:1.7;color:#334155;">Hello {$hello}, we received a request to reset the password for your account. Use the button below. It works <strong>once</strong> and expires in <strong>one hour</strong>.</p>
+      {$buttons}
+      <p style="margin:22px 0 0;font-size:13px;line-height:1.6;color:#64748b;">If you did not ask for this, you can ignore this email. Your password stays the same until someone uses the link.</p>
+    </div>
+    <div style="padding:16px 30px;border-top:1px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:12px;text-align:center;">Sent by {$app}. Never share this email: anyone with the link can set a new password.</div>
+  </div>
+</body></html>
+HTML;
+        $this->mailer->send($to, $name, 'Reset your ' . $this->appName . ' password', $html, "Hello,\n\nUse this link to choose a new password (works once, expires in one hour):\n\n" . $plain . "\nIf you did not ask for this, ignore this email.\n\n" . $this->appName);
+    }
 }

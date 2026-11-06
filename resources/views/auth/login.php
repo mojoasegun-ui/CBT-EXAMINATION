@@ -20,7 +20,7 @@ if ($area !== 'console'):
             <button type="button" class="si-eye" data-toggle-password="password" aria-label="Show password"><?= icon('eye', 'h-5 w-5') ?></button></div>
         <button type="submit" class="si-btn"><span data-label>Sign In</span><?= icon('arrow-right', 'h-5 w-5') ?></button>
     </form>
-    <p class="si-help">Forgot your password? Ask your school administrator to reset it.</p>
+    <p class="si-help"><a href="<?= e(url('/forgot-password')) ?>">Forgot your password?</a></p>
     <p class="si-help si-help-2">Just want to practise? <a href="<?= e(url('/')) ?>">Free practice, no account</a></p>
 <?php else: ?>
 <div>

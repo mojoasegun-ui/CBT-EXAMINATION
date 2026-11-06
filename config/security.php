@@ -18,6 +18,8 @@ return [
             ['name' => 'attempt-start', 'pattern' => '#^/(start|attempts/[^/]+/retake)$#', 'methods' => ['POST'], 'limit' => 20, 'window' => 60, 'ip_limit' => 400],
             // Password guessing: tight per client, on top of per-account lockout after 5 failures.
             ['name' => 'sign-in', 'pattern' => '#^/(console/login|login|login/two-factor|login/choose|student/login|setup)$#', 'methods' => ['POST'], 'limit' => 10, 'window' => 60, 'ip_limit' => 300],
+            ['name' => 'password-reset', 'pattern' => '#^/forgot-password$#', 'methods' => ['POST'], 'limit' => 5, 'window' => 600, 'ip_limit' => 60],
+            ['name' => 'password-reset-save', 'pattern' => '#^/reset-password/#', 'methods' => ['POST'], 'limit' => 10, 'window' => 600, 'ip_limit' => 120],
             ['name' => 'result-check', 'pattern' => '#^/check-result$#', 'methods' => ['POST'], 'limit' => 8, 'window' => 60, 'ip_limit' => 120],
             ['name' => 'practice-start', 'pattern' => '#^/practice/start$#', 'methods' => ['POST'], 'limit' => 30, 'window' => 60, 'ip_limit' => 600],
             ['name' => 'practice-save', 'pattern' => '#^/practice/s/[a-f0-9]+/(sync|submit)$#', 'methods' => ['POST'], 'limit' => 240, 'window' => 60],

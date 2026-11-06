@@ -16,7 +16,7 @@ if (($user['role'] ?? '') === 'school_admin') {
 $nav = match (true) {
     $isConsole => [
         'Overview' => [['/console', 'dashboard', 'Dashboard'], ['/console/announcements', 'bell', 'Announcements']],
-        'Platform' => [['/console/schools', 'school', 'Schools'], ['/console/bank', 'library', 'Platform bank'], ['/console/plans', 'layers', 'Plans & features'], ['/console/flyer', 'sparkles', 'Flyer & QR'], ['/console/audit', 'list-checks', 'Audit log'], ['/console/system', 'server', 'System']],
+        'Platform' => [['/console/schools', 'school', 'Schools'], ['/console/bank', 'library', 'Platform bank'], ['/console/plans', 'layers', 'Plans & features'], ['/console/branding', 'palette', 'Brand & name'], ['/console/flyer', 'sparkles', 'Flyer & QR'], ['/console/audit', 'list-checks', 'Audit log'], ['/console/system', 'server', 'System']],
         'Account' => [['/console/account/password', 'key', 'Password'], ['/console/account/two-factor', 'shield', 'Two-step verification']],
     ],
     $isStudentArea => [

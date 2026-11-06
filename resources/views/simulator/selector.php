@@ -23,7 +23,7 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
     <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-3 sm:h-[72px] sm:px-6 lg:px-8">
         <a href="<?= e($homeUrl) ?>" class="brand inline-flex min-h-11 min-w-0 shrink items-center gap-2.5 rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600" aria-label="<?= e($appName) ?> practice home">
             <span class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 shadow-md shadow-blue-900/25 sm:h-11 sm:w-11"><svg class="h-6 w-6 text-white" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 6 5 13l15 7 15-7-15-7Z" fill="#fff"/><path d="M11 18v7c2.4 2.6 5.6 4 9 4s6.6-1.4 9-4v-7l-9 4.2L11 18Z" fill="#fff" opacity=".85"/><path d="M34 14v9" stroke="#fbbf24" stroke-width="2.4" stroke-linecap="round"/></svg></span>
-            <span class="min-w-0 leading-tight"><span class="block truncate font-display text-[17px] font-extrabold text-ink sm:text-xl"><?= e($appName) ?></span><span class="hidden text-xs font-medium text-slate-500 min-[380px]:block">Learn &middot; Practice &middot; Excel</span></span>
+            <span class="min-w-0 leading-tight"><span class="block truncate font-display text-[17px] font-extrabold text-ink sm:text-xl"><?= e($appName) ?></span><span class="hidden text-xs font-medium text-slate-500 min-[380px]:block"><?= e($tagline ?? 'Learn · Practice · Excel') ?></span></span>
         </a>
         <div class="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
             <button type="button" class="theme-toggle" aria-label="Toggle dark mode" data-theme-toggle><span class="theme-toggle__icon" aria-hidden="true">☀️</span></button>
@@ -290,7 +290,7 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
             </div>
         </div>
         <div class="mt-10 flex flex-col gap-3 border-t border-white/15 pt-6 text-sm text-slate-200 sm:flex-row sm:items-center sm:justify-between">
-            <p>&copy; <?= date('Y') ?> <?= e($appName) ?>. All rights reserved.</p>
+            <p>&copy; <?= date('Y') ?> <?= e($appName) ?>. All rights reserved. <a class="underline hover:text-amber-300" href="<?= e(url('/privacy')) ?>">Privacy</a> &middot; <a class="underline hover:text-amber-300" href="<?= e(url('/terms')) ?>">Terms</a></p>
             <p>Powered by <span class="font-semibold text-white"><?= e($appName) ?></span></p>
         </div>
     </div>

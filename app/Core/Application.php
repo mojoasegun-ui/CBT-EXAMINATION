@@ -13,6 +13,7 @@ use ExamCore\Integrations\WebsiteAdapter;
 use ExamCore\Jobs\SendAttemptResultEmail;
 use ExamCore\Middleware\CsrfMiddleware;
 use ExamCore\Middleware\RateLimitMiddleware;
+use ExamCore\Models\PlatformSettings;
 use ExamCore\Models\Attempt;
 use ExamCore\Models\AttemptAnswer;
 use ExamCore\Models\Exam;
@@ -54,7 +55,14 @@ final class Application
         $cspNonce = rtrim(strtr(base64_encode(random_bytes(16)), '+/', '-_'), '=');
         $view = new View($root . '/resources/views');
         $view->share('cspNonce', $cspNonce);
-        $view->share('appName', (string) ($config['app']['name'] ?? 'ExamCore CBT'));
+        $database = new Database($config['database'] ?? []);
+        $brand = self::brand($database);
+        $config['app']['name'] = ($brand['product_name'] ?? '') !== '' ? $brand['product_name'] : (string) ($config['app']['name'] ?? PlatformSettings::DEFAULT_NAME);
+        $config['app']['short_name'] = ($brand['short_name'] ?? '') !== '' ? $brand['short_name'] : PlatformSettings::DEFAULT_SHORT;
+        $config['app']['tagline'] = ($brand['tagline'] ?? '') !== '' ? $brand['tagline'] : PlatformSettings::DEFAULT_TAGLINE;
+        $config['app']['support_email'] = (string) ($brand['support_email'] ?? '');
+        $view->share('appName', (string) $config['app']['name']);
+        $view->share('tagline', (string) $config['app']['tagline']);
         $errorHandler->useView($view, $baseUrl);
         Asset::configure($baseUrl, $root . '/public');
         Url::configure($baseUrl);
@@ -64,7 +72,7 @@ final class Application
         $container->instance('root', $root);
         $container->instance(Logger::class, $logger);
         $container->instance(View::class, $view);
-        $container->instance(Database::class, new Database($config['database'] ?? []));
+        $container->instance(Database::class, $database);
         $container->instance(Session::class, new Session($config['security'] ?? [], $storage . '/sessions'));
         self::registerServices($container, $config, $root);
 
@@ -142,6 +150,16 @@ final class Application
         return $this->container;
     }
 
+    /** @return array<string,string> owner-chosen name and contact details; empty before the table exists */
+    private static function brand(Database $database): array
+    {
+        try {
+            return (new PlatformSettings($database))->all();
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
     /** @param array<string, array<string, mixed>> $config */
     private static function registerServices(Container $container, array $config, string $root): void
     {
@@ -205,6 +223,10 @@ final class Application
             => 'woke ' . $services->get(\ExamCore\Services\PushService::class)->drain($web ? 60 : 300) . ' phone(s)');
         $scheduler->every(1800, 'push:engage', static fn (bool $web): string
             => 'nudged ' . $services->get(\ExamCore\Services\PushService::class)->engage($web ? 40 : 300) . ' device(s)');
+        $scheduler->every(86400, 'terms:freeze', static fn (): string
+            => 'froze ' . $services->get(\ExamCore\Services\ResultService::class)->freezeEndedTerms() . ' ended term(s)');
+        $scheduler->every(86400, 'auth:purge-resets', static fn (): string
+            => 'deleted ' . $services->get(\ExamCore\Models\PasswordReset::class)->purgeOld() . ' old reset link(s)');
         $scheduler->every(60, 'queue:work', static fn (bool $web): string
             => 'processed ' . $services->get(Worker::class)->work($web ? 3 : 50, $web ? 8.0 : 50.0) . ' job(s)');
         $scheduler->every(300, 'queue:release-stale', static fn (): string

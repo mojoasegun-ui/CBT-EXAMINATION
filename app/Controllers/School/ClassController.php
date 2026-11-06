@@ -159,6 +159,10 @@ final class ClassController extends SchoolController
         if ($plan === []) {
             return $this->redirectTo('/school/classes/promote', 'Choose where at least one class should move.', 'error');
         }
+        $currentTerm = $this->container->get(\ExamCore\Models\AcademicCalendar::class)->current($this->schoolId())['term']['id'] ?? null;
+        if ($currentTerm !== null) {
+            $this->container->get(\ExamCore\Services\ResultService::class)->freezeTerm($this->schoolId(), (int) $currentTerm); // the closing term keeps its rules
+        }
         $result = $this->students->promote($this->schoolId(), $plan);
         $note = '';
         if ($request->input('start_next') === '1') {

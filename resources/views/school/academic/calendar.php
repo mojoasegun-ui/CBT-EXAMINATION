@@ -31,6 +31,7 @@ $nextYear = $sessions === [] ? (int) date('Y') - ((int) date('n') < 8 ? 1 : 0) :
                 <?php foreach ($session['terms'] as $term): ?>
                     <div class="bg-card p-5 <?= $term['is_current'] ? 'bg-brand/[.03]' : '' ?>">
                         <div class="flex items-center justify-between gap-2"><p class="font-semibold text-ink"><?= e($term['name']) ?></p>
+                            <?php if (!empty($term['frozen_at'])): ?><span class="badge badge-gray" title="Grading rules were saved on <?= e(local_date((string) $term['frozen_at'], 'j M Y')) ?>">Rules locked</span><?php endif; ?>
                             <?php if ($term['is_current']): ?><span class="badge badge-brand">Current</span><?php else: ?>
                                 <form method="post" action="<?= e(url('/school/academic/terms/' . $term['id'] . '/current')) ?>"><input type="hidden" name="_csrf_token" value="<?= e($csrfToken) ?>"><button class="btn btn-secondary btn-sm">Make current</button></form>
                             <?php endif; ?></div>

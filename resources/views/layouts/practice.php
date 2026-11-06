@@ -40,7 +40,7 @@ $nav = [['/practice', 'Practice', 'sparkles'], ['/practice/mock', 'Mock exam', '
 </header>
 <main id="main" class="mx-auto max-w-6xl px-4 py-6 sm:py-8"><?php if (empty($user)) { $pushGuest = true; $pushTitle = 'Get a daily practice reminder'; $pushText = 'Turn on alerts and we will nudge you to practise, protect your streak and tell you about new question sets.'; } require __DIR__ . '/../partials/portal/push-banner.php'; ?><?= $content ?></main>
 <footer class="mx-auto max-w-6xl px-4 pb-10 pt-2 text-center text-xs text-subtle">
-    Free practice from the JAMB, WAEC and NECO syllabus topics. <a class="font-medium text-brand hover:underline" href="<?= e(url('/')) ?>">ExamCore home</a>
+    Free practice from the JAMB, WAEC and NECO syllabus topics. <a class="font-medium text-brand hover:underline" href="<?= e(url('/')) ?>"><?= e($appName) ?> home</a> &middot; <a class="hover:underline" href="<?= e(url('/privacy')) ?>">Privacy</a> &middot; <a class="hover:underline" href="<?= e(url('/terms')) ?>">Terms</a>
 </footer>
 </body>
 </html>

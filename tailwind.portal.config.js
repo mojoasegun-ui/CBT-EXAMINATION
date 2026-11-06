@@ -5,6 +5,8 @@ module.exports = {
         "./resources/views/layouts/portal.php",
         "./resources/views/layouts/auth.php",
         "./resources/views/layouts/signin.php",
+        "./resources/views/layouts/doc.php",
+        "./resources/views/legal/**/*.php",
         "./resources/views/partials/signin-tabs.php",
         "./resources/views/layouts/exam.php",
         "./resources/views/layouts/print.php",

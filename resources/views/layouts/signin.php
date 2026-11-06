@@ -58,7 +58,7 @@ $mark = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 6 5 13l15 7 15
             </div>
             <?= $content ?>
         </div>
-        <p class="si-foot"><?= icon('lock', 'h-3.5 w-3.5') ?> Secure sign-in &middot; &copy; <?= date('Y') ?> <?= e($appName) ?></p>
+        <p class="si-foot"><?= icon('lock', 'h-3.5 w-3.5') ?> Secure sign-in &middot; <a href="<?= e(url('/privacy')) ?>">Privacy</a> &middot; <a href="<?= e(url('/terms')) ?>">Terms</a></p>
     </main>
 </div>
 </body>

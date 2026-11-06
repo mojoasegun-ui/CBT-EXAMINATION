@@ -38,6 +38,8 @@ final class Kernel
             'bank:seed-syllabus' => ['Load the syllabus-based practice questions (database/seeds/syllabus) into the platform bank; safe to re-run', fn (array $o): int => $this->seedSyllabus()],
             'bank:build-sets' => ['Build year-named public practice sets (2005-2026) from the bank. --board=jamb|waec|neco --subject="Biology" --from=2005 --to=2026', fn (array $o): int => $this->buildSets($o)],
             'push:keys' => ['Create the VAPID keys for phone notifications in .env if missing (never overwrites)', fn (array $o): int => $this->pushKeys()],
+            'terms:freeze' => ['Freeze the grading rules of every ended term so later changes cannot rewrite old report cards', fn (array $o): int => $this->freezeTerms()],
+            'auth:reset-link' => ['Print a password-reset link for a staff email (support tool). --email=teacher@school.ng', fn (array $o): int => $this->resetLink($o)],
             'owner:create' => ['Create an Owner Console account. --name="Ada Obi" --email=you@x.ng [--password=...]', fn (array $o): int => $this->createOwner($o)],
         ];
     }
@@ -129,6 +131,30 @@ final class Kernel
         $service = new BackupService($this->container->get(Database::class), $this->container->get('root') . '/storage/backups');
         $path = $service->create();
         $this->line("\033[32mBackup written:\033[0m {$path} (" . number_format((float) filesize($path) / 1024, 1) . ' KB)');
+        return 0;
+    }
+
+    private function freezeTerms(): int
+    {
+        $this->line('Froze ' . $this->container->get(\ExamCore\Services\ResultService::class)->freezeEndedTerms() . ' ended term(s).');
+        return 0;
+    }
+
+    private function resetLink(array $options): int
+    {
+        $email = trim($options['email'] ?? '');
+        if ($email === '') {
+            $this->line('Usage: php cbt auth:reset-link --email=teacher@school.ng');
+            return 1;
+        }
+        $links = $this->container->get(\ExamCore\Services\PasswordRecoveryService::class)->issueFor($email, null);
+        if ($links === []) {
+            $this->line('No active staff account found for that email (or too many recent requests).');
+            return 1;
+        }
+        foreach ($links as $link) {
+            $this->line(sprintf("%s (%s)\n  %s\n  Valid for one hour, works once.", $link['school'], $link['name'], $link['url']));
+        }
         return 0;
     }
 

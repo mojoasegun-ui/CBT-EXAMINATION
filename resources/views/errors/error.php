@@ -10,7 +10,7 @@ $canRetry = in_array($status, [419, 429, 500, 503], true);
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
     <meta name="robots" content="noindex">
-    <title><?= e($title) ?> · ExamCore</title>
+    <title><?= e($title) ?> · <?= e($appName ?? 'ExamCore') ?></title>
     <style nonce="<?= e($cspNonce ?? '') ?>">
         :root { --bg:#f8fafc; --card:#fff; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0; --brand:#1e40af; --brand-ink:#fff; --soft:#eff6ff; }
         @media (prefers-color-scheme: dark) { :root { --bg:#020817; --card:#0f172a; --ink:#e2e8f0; --muted:#94a3b8; --line:#1e293b; --brand:#3b82f6; --soft:#0b1a36; } }

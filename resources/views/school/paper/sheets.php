@@ -46,7 +46,7 @@ $fit = static fn (string $s, int $n): string => mb_strlen($s) > $n ? mb_substr($
             <text x="<?= $b['x'] ?>" y="<?= $b['y'] + 0.95 ?>" font-size="2.5" text-anchor="middle" fill="#888"><?= $b['d'] ?></text>
         <?php endforeach; ?>
     <?php endif; ?>
-    <text x="105" y="276" font-size="2.5" text-anchor="middle" fill="#888">ExamCore · scan with the school's phone · <?= e($s['admission_no']) ?> · Paper <?= e($s['version']) ?></text>
+    <text x="105" y="276" font-size="2.5" text-anchor="middle" fill="#888"><?= e($appName) ?> · scan with the school's phone · <?= e($s['admission_no']) ?> · Paper <?= e($s['version']) ?></text>
 </svg>
 <?php endforeach; ?>
 <?php if ($sheets === []): ?><div class="card empty"><p class="text-sm text-muted">No students in the selected classes.</p></div><?php endif; ?>

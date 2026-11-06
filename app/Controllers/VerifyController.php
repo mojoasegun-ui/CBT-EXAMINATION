@@ -45,7 +45,7 @@ final class VerifyController extends PortalController
                 $school = $this->schools->find((int) $sitting['school_id']);
                 $student = $this->students->find((int) $sitting['school_id'], (int) $sitting['student_id']);
                 $data = ['valid' => true, 'kind' => 'slip', 'school' => $school, 'student' => $student, 'exam' => $exam, 'sitting' => $sitting,
-                    'grade' => $this->results->grade((int) $sitting['school_id'], (float) $sitting['percent'])] + $data;
+                    'grade' => $this->results->grade((int) $sitting['school_id'], (float) $sitting['percent'], $this->results->frozenRules((int) ($exam['term_id'] ?? 0))['bands'] ?? null)] + $data;
             }
         } elseif ($parsed !== null && $parsed['kind'] === 'r' && count($parsed['ids']) === 2) {
             [$studentId, $termId] = $parsed['ids'];

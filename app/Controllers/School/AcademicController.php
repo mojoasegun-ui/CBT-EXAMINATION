@@ -65,8 +65,12 @@ final class AcademicController extends SchoolController
 
     public function setCurrentTerm(Request $request, array $parameters): Response
     {
+        $before = $this->calendar->current($this->schoolId())['term']['id'] ?? null;
         $ok = $this->calendar->setCurrentTerm($this->schoolId(), $this->idParam($parameters));
         if ($ok) {
+            if ($before !== null && (int) $before !== $this->idParam($parameters)) {
+                $this->container->get(\ExamCore\Services\ResultService::class)->freezeTerm($this->schoolId(), (int) $before); // the term just left keeps its rules
+            }
             $this->container->get(\ExamCore\Models\Enrolment::class)->sync($this->schoolId());
             $this->audit->record('calendar.current_term', 'Changed the current term', 'term', $this->idParam($parameters), schoolId: $this->schoolId());
         }
