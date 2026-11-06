@@ -15,11 +15,17 @@ use RuntimeException;
  * Clients are identified by their session cookie when present and by IP
  * otherwise. Keying on IP alone would throttle a whole school, because every
  * student behind the school's router shares one public address.
+ *
+ * The cookie value is not proof of a real session, so a script could invent a
+ * new one per request and get a fresh allowance every time. Sensitive buckets
+ * (sign-in, result check, attempt creation) therefore also carry an "ip_limit":
+ * a much larger per-IP ceiling that a whole school can stay under but a
+ * cookie-rotating script cannot. Exam traffic never has an ip_limit.
  */
 final class RateLimitMiddleware implements MiddlewareInterface
 {
     /**
-     * @param list<array{name: string, pattern: string, methods?: list<string>, limit: int, window: int}> $buckets First match wins.
+     * @param list<array{name: string, pattern: string, methods?: list<string>, limit: int, window: int, ip_limit?: int}> $buckets First match wins.
      * @param array{limit: int, window: int} $default
      */
     public function __construct(
@@ -32,15 +38,26 @@ final class RateLimitMiddleware implements MiddlewareInterface
 
     public function process(Request $request, callable $next): Response
     {
-        [$name, $limit, $window] = $this->bucketFor($request);
+        [$name, $limit, $window, $ipLimit] = $this->bucketFor($request);
         if ($limit < 1 || $window < 1) {
             return $next($request);
         }
         if (!is_dir($this->storagePath) || !is_writable($this->storagePath)) {
-            throw new RuntimeException('Rate limit storage is unavailable.');
+            throw new RuntimeException('Rate limiter storage is unavailable.');
         }
+        $key = $this->clientKey($request);
+        $this->consume($name . '|' . $key, $limit, $window);
+        // A made-up cookie per request would dodge the counter above; the per-IP ceiling cannot be dodged that way.
+        if ($ipLimit > 0 && !str_starts_with($key, 'ip:')) {
+            $this->consume($name . '|ceiling|' . $request->ip(), $ipLimit, $window);
+        }
+        return $next($request);
+    }
 
-        $file = $this->storagePath . '/rate-' . hash('sha256', $name . '|' . $this->clientKey($request)) . '.json';
+    /** Count one hit in a fixed window; throws 429 when the allowance is used up. */
+    private function consume(string $identity, int $limit, int $window): void
+    {
+        $file = $this->storagePath . '/rate-' . hash('sha256', $identity) . '.json';
         $handle = fopen($file, 'c+');
         if ($handle === false) {
             throw new RuntimeException('Rate limiter could not initialize.');
@@ -68,10 +85,9 @@ final class RateLimitMiddleware implements MiddlewareInterface
             flock($handle, LOCK_UN);
             fclose($handle);
         }
-        return $next($request);
     }
 
-    /** @return array{0: string, 1: int, 2: int} */
+    /** @return array{0: string, 1: int, 2: int, 3: int} name, limit, window, per-IP ceiling (0 = none) */
     private function bucketFor(Request $request): array
     {
         foreach ($this->buckets as $bucket) {
@@ -80,10 +96,10 @@ final class RateLimitMiddleware implements MiddlewareInterface
                 continue;
             }
             if (preg_match($bucket['pattern'], $request->path()) === 1) {
-                return [$bucket['name'], (int) $bucket['limit'], (int) $bucket['window']];
+                return [$bucket['name'], (int) $bucket['limit'], (int) $bucket['window'], (int) ($bucket['ip_limit'] ?? 0)];
             }
         }
-        return ['default', (int) $this->default['limit'], (int) $this->default['window']];
+        return ['default', (int) $this->default['limit'], (int) $this->default['window'], 0];
     }
 
     private function clientKey(Request $request): string

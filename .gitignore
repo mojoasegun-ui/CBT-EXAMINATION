@@ -29,3 +29,6 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+
+# local security-test accounts
+tests/Security/accounts.local.php
