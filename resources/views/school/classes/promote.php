@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-/** @var list<array<string,mixed>> $classes @var array<int,int|string> $suggestions */
+/** @var list<array<string,mixed>> $classes @var array<int,int|string> $suggestions @var array{session:?array,term:?array} $current */
 ?>
 <a href="<?= e(url('/school/classes')) ?>" class="inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-ink"><?= icon('arrow-left', 'h-4 w-4') ?>Classes</a>
 <h1 class="mt-3 font-display text-[30px] font-semibold text-ink">End-of-session promotion</h1>
@@ -29,6 +29,10 @@ declare(strict_types=1);
             <?php endforeach; ?>
             </tbody>
         </table>
+    </div>
+    <div class="border-t border-line px-6 py-5">
+        <label class="flex items-start gap-3 text-sm text-ink"><input type="checkbox" name="start_next" value="1" class="checkbox mt-0.5" checked>
+            <span><b>Also start the next academic session</b><br><span class="text-muted">Creates the next session (if it does not exist) and makes its First Term current. <?= $current['session'] !== null ? e($current['session']['name']) . ' is closed and kept as history: you can always look it up under Records.' : '' ?></span></span></label>
     </div>
     <div class="flex justify-end border-t border-line px-6 py-4"><button class="btn btn-primary"><?= icon('arrow-right') ?><span data-label>Promote students</span></button></div>
 </form>

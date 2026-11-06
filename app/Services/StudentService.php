@@ -49,6 +49,7 @@ final class StudentService
         private readonly Crypto $crypto,
         private readonly ImageUpload $images,
         private readonly AuditService $audit,
+        private readonly \ExamCore\Models\Enrolment $enrolments,
     ) {
     }
 
@@ -191,6 +192,8 @@ final class StudentService
         uksort($plan, static fn ($a, $b): int => ($order[(int) $b] ?? 0) <=> ($order[(int) $a] ?? 0));
 
         $result = $this->database->transaction(function () use ($schoolId, $plan, $validClassIds): array {
+            // Freeze the current session's history (who was promoted, repeated or graduated) before anyone moves.
+            $this->enrolments->closeCurrent($schoolId, $plan);
             $moved = $graduated = 0;
             foreach ($plan as $from => $to) {
                 if (!in_array((int) $from, $validClassIds, true)) {

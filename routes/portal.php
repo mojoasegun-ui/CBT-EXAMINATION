@@ -11,6 +11,7 @@ use ExamCore\Controllers\Console\PlanController;
 use ExamCore\Controllers\Console\SchoolController;
 use ExamCore\Controllers\School\AcademicController;
 use ExamCore\Controllers\School\ClassController;
+use ExamCore\Controllers\School\RecordsController;
 use ExamCore\Controllers\School\DashboardController;
 use ExamCore\Controllers\School\ExamController;
 use ExamCore\Controllers\School\SettingsController;
@@ -116,6 +117,10 @@ return static function (Router $router, Container $container): void {
         $router->post('/announcements', [AnnouncementController::class, 'store']);
         $router->post('/announcements/{id}/delete', [AnnouncementController::class, 'delete']);
         $router->get('/my-classes', [TeacherController::class, 'mine']);
+        $router->get('/records', [RecordsController::class, 'index']);
+        $router->get('/records/{id}', [RecordsController::class, 'show']);
+        $router->get('/records/{id}/print', [RecordsController::class, 'print']);
+        $router->get('/records/{id}/export', [RecordsController::class, 'export']);
         $router->get('/exams', [ExamController::class, 'index']);
         $router->get('/exams/create', [ExamController::class, 'create']);
         $router->post('/exams', [ExamController::class, 'store']);

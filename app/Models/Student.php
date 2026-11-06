@@ -132,13 +132,16 @@ final class Student extends Model
             }
         }
         $this->insertRow('student_profiles', $data);
+        (new Enrolment($this->database))->sync($schoolId, $userId);
     }
 
     /** @param array<string, mixed> $profile */
     public function updateProfile(int $schoolId, int $userId, array $profile): int
     {
-        return $this->updateScoped('student_profiles', $schoolId, $userId, array_intersect_key($profile, array_flip(self::PROFILE_FIELDS)) + ['updated_at' => self::now()],
+        $changed = $this->updateScoped('student_profiles', $schoolId, $userId, array_intersect_key($profile, array_flip(self::PROFILE_FIELDS)) + ['updated_at' => self::now()],
             [...self::PROFILE_FIELDS, 'updated_at'], 'user_id');
+        (new Enrolment($this->database))->sync($schoolId, $userId);
+        return $changed;
     }
 
     public function countActive(int $schoolId): int
@@ -155,6 +158,13 @@ final class Student extends Model
 
     /** Move every active student of one class to another (promotion), or mark them graduated. */
     public function moveClass(int $schoolId, int $fromClassId, ?int $toClassId, ?string $newStatus = null): int
+    {
+        $n = $this->moveClassNow($schoolId, $fromClassId, $toClassId, $newStatus);
+        (new Enrolment($this->database))->sync($schoolId);
+        return $n;
+    }
+
+    private function moveClassNow(int $schoolId, int $fromClassId, ?int $toClassId, ?string $newStatus): int
     {
         if ($newStatus !== null) {
             return $this->run('UPDATE ' . $this->table('student_profiles') . ' SET status = ?, updated_at = ? WHERE school_id = ? AND class_id = ? AND status = \'active\'',

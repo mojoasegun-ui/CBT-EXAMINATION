@@ -96,31 +96,55 @@ $people['anon'] = new Client($base);
 // ---------------------------------------------------------------- routes (from the real route file)
 $lines = file($root . '/routes/portal.php');
 $routes = [];
-foreach ($lines as $i => $text) {
+$stack = [];   // open route groups: [indent, prefix, middleware names]
+$inBank = false;
+foreach ($lines as $text) {
+    $indent = strlen($text) - strlen(ltrim($text));
+    if (str_contains($text, '$bankRoutes = static function')) {
+        $inBank = true;
+        continue;
+    }
+    if ($inBank && rtrim($text) === '    };') {
+        $inBank = false;
+        continue;
+    }
+    if (preg_match('/->group\(\[(.*?)\], static function/', $text, $g)) {
+        preg_match("/'prefix' => '([^']*)'/", $g[1], $pm);
+        preg_match_all('/\$([A-Za-z]+)/', $g[1], $mw);
+        $stack[] = [$indent, $pm[1] ?? '', $mw[1]];
+        continue;
+    }
+    if ($stack !== [] && rtrim($text) === str_repeat(' ', end($stack)[0]) . '});') {
+        array_pop($stack);
+        continue;
+    }
     if (!preg_match('/\$router->(get|post)\(\'([^\']+)\'/', $text, $m)) {
         continue;
     }
-    $n = $i + 1;
     [$method, $path] = [strtoupper($m[1]), $m[2]];
-    $ctx = match (true) {
-        $n >= 62 && $n <= 75 => 'bank',
-        $n >= 77 && $n <= 107 => 'console',
-        $n >= 112 && $n <= 157 => 'school',
-        $n >= 158 && $n <= 222 => 'school-admin',
-        $n >= 253 && $n <= 271 => 'student',
-        default => null,
-    };
-    if ($ctx === null || str_contains($path, 'logout') || str_contains($path, 'stop-impersonating')) {
+    if (str_contains($path, 'logout') || str_contains($path, 'stop-impersonating')) {
         continue;
     }
-    if ($ctx === 'bank') {
+    if ($inBank) {
         $routes[] = [$method, '/console' . $path, 'console'];
         $routes[] = [$method, '/school' . $path, 'school'];
         continue;
     }
-    $prefix = $ctx === 'console' ? '/console' : ($ctx === 'student' ? '/student' : '/school');
+    $names = array_merge(...array_map(static fn (array $g): array => $g[2], $stack ?: [[0, '', []]]));
+    $prefix = implode('', array_column($stack, 1));
+    $ctx = match (true) {
+        in_array('adminOnly', $names, true) => 'school-admin',
+        in_array('owner', $names, true) => 'console',
+        in_array('staff', $names, true) => 'school',
+        in_array('student', $names, true) => 'student',
+        default => null,
+    };
+    if ($ctx === null) {
+        continue;
+    }
     $routes[] = [$method, $prefix . ($path === '/' ? '' : $path), $ctx];
 }
+echo '   routes found: ' . count($routes) . ' (console ' . count(array_filter($routes, fn ($r) => $r[2] === 'console')) . ', school ' . count(array_filter($routes, fn ($r) => $r[2] === 'school')) . ', school-admin ' . count(array_filter($routes, fn ($r) => $r[2] === 'school-admin')) . ', student ' . count(array_filter($routes, fn ($r) => $r[2] === 'student')) . ")\n";
 $allowed = ['console' => ['owner'], 'school' => ['admin', 'teacher'], 'school-admin' => ['admin'], 'student' => ['student']];
 
 // ---------------------------------------------------------------- 1. role matrix
@@ -179,7 +203,7 @@ $fill = static function (string $path, array $id): ?string {
         $subs['{id}'] = $id['teacher'];
     } elseif (str_contains($path, '/students/import/{id}')) {
         $subs['{id}'] = $id['import'];
-    } elseif (str_contains($path, '/students/{id}')) {
+    } elseif (str_contains($path, '/students/{id}') || str_contains($path, '/records/{id}')) {
         $subs['{id}'] = $id['student'];
     } elseif (str_contains($path, '/departments/{id}')) {
         $subs['{id}'] = $id['department'];
@@ -217,7 +241,8 @@ $fingerprint = static function (int $school) use ($pdo, $env, $pre): array {
     $out = [];
     $tables = $pdo->query("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = " . $pdo->quote($env['DB_DATABASE']) . " AND TABLE_NAME LIKE '{$pre}%'")->fetchAll(PDO::FETCH_COLUMN);
     foreach ($tables as $t) {
-        if (preg_match('/(sessions|rate|throttle|cache|jobs|migrations|notifications|push_)/', $t) && !str_contains($t, 'academic')) {
+        // audit_logs is an append-only diary: viewing your own school's records legitimately adds lines to it.
+        if (preg_match('/(sessions|rate|throttle|cache|jobs|migrations|notifications|push_|audit_logs)/', $t) && !str_contains($t, 'academic')) {
             continue;
         }
         $cols = $pdo->query("SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = " . $pdo->quote($env['DB_DATABASE']) . " AND TABLE_NAME = " . $pdo->quote($t) . " ORDER BY ORDINAL_POSITION")->fetchAll(PDO::FETCH_COLUMN);

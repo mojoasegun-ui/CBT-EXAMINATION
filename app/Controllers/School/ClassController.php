@@ -144,7 +144,8 @@ final class ClassController extends SchoolController
             $next = $this->classes->nextLevel($this->schoolId(), $class);
             $suggestions[(int) $class['id']] = $class['level'] === SchoolClass::FINAL_LEVEL || $next === null ? 'graduate' : (int) $next['id'];
         }
-        return $this->page($request, 'school/classes/promote', $this->base('Promote students') + ['classes' => $classes, 'suggestions' => $suggestions]);
+        return $this->page($request, 'school/classes/promote', $this->base('Promote students') + ['classes' => $classes, 'suggestions' => $suggestions,
+            'current' => $this->container->get(\ExamCore\Models\AcademicCalendar::class)->current($this->schoolId())]);
     }
 
     public function promote(Request $request): Response
@@ -159,7 +160,31 @@ final class ClassController extends SchoolController
             return $this->redirectTo('/school/classes/promote', 'Choose where at least one class should move.', 'error');
         }
         $result = $this->students->promote($this->schoolId(), $plan);
-        return $this->redirectTo('/school/classes', sprintf('Done: %d student(s) moved up and %d graduated.', $result['moved'], $result['graduated']));
+        $note = '';
+        if ($request->input('start_next') === '1') {
+            $note = ' ' . $this->startNextSession();
+        }
+        return $this->redirectTo('/school/classes', sprintf('Done: %d student(s) moved up and %d graduated.', $result['moved'], $result['graduated']) . $note);
+    }
+
+    /** Create the next academic session (if missing), make its first term current and open everyone's new-session record. */
+    private function startNextSession(): string
+    {
+        $calendar = $this->container->get(\ExamCore\Models\AcademicCalendar::class);
+        $current = $calendar->current($this->schoolId());
+        $startYear = $current['session'] !== null ? (int) substr((string) $current['session']['name'], 0, 4) + 1 : (int) gmdate('Y');
+        $name = $startYear . '/' . ($startYear + 1);
+        if (!$calendar->sessionExists($this->schoolId(), $name)) {
+            $calendar->createSession($this->schoolId(), $startYear);
+        }
+        foreach ($calendar->sessions($this->schoolId()) as $session) {
+            if ($session['name'] === $name && ($session['terms'][0]['id'] ?? null) !== null) {
+                $calendar->setCurrentTerm($this->schoolId(), (int) $session['terms'][0]['id']);
+                $this->container->get(\ExamCore\Models\Enrolment::class)->sync($this->schoolId());
+                return 'The ' . $name . ' session has started; its First Term is now current.';
+            }
+        }
+        return 'Create the next session under Academic year.';
     }
 
     /** @return array{0: array<string, mixed>, 1: array<string, string>} */

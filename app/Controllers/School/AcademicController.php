@@ -67,6 +67,7 @@ final class AcademicController extends SchoolController
     {
         $ok = $this->calendar->setCurrentTerm($this->schoolId(), $this->idParam($parameters));
         if ($ok) {
+            $this->container->get(\ExamCore\Models\Enrolment::class)->sync($this->schoolId());
             $this->audit->record('calendar.current_term', 'Changed the current term', 'term', $this->idParam($parameters), schoolId: $this->schoolId());
         }
         return $this->redirectTo('/school/academic', $ok ? 'Current term updated. New exams and results will use it.' : 'Term not found.', $ok ? 'success' : 'error');

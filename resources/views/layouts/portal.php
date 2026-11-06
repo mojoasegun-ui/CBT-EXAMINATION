@@ -27,14 +27,14 @@ $nav = match (true) {
     ],
     ($user['role'] ?? '') === 'school_admin' => [
         'Overview' => [['/school', 'dashboard', 'Dashboard'], ['/school/announcements', 'bell', 'Announcements']],
-        'People' => [['/school/students', 'graduation', 'Students'], ['/school/teachers', 'users', 'Teachers & staff']],
+        'People' => [['/school/students', 'graduation', 'Students'], ['/school/records', 'list-checks', 'Records & history'], ['/school/teachers', 'users', 'Teachers & staff']],
         'Academics' => [['/school/classes', 'school', 'Classes'], ['/school/subjects', 'book', 'Subjects'], ['/school/departments', 'layers', 'Departments'], ['/school/academic', 'calendar', 'Academic year'], ['/school/grading', 'sliders', 'Grading scale']],
         'Exams' => $soonExams,
         'School' => [['/school/settings', 'palette', 'Profile & branding'], ['/school/flyer', 'sparkles', 'Flyer & QR'], ['/school/activity', 'list-checks', 'Activity log']],
         'Account' => [['/school/account/password', 'key', 'Password'], ['/school/account/two-factor', 'shield', 'Two-step verification']],
     ],
     default => [
-        'Overview' => [['/school', 'dashboard', 'Dashboard'], ['/school/announcements', 'bell', 'Announcements'], ['/school/my-classes', 'school', 'My classes']],
+        'Overview' => [['/school', 'dashboard', 'Dashboard'], ['/school/announcements', 'bell', 'Announcements'], ['/school/my-classes', 'school', 'My classes'], ['/school/records', 'list-checks', 'Records & history']],
         'Exams' => $soonExams,
         'Account' => [['/school/account/password', 'key', 'Password'], ['/school/account/two-factor', 'shield', 'Two-step verification']],
     ],
