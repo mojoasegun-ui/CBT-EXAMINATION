@@ -54,8 +54,19 @@ if ($isAdmin) {
         <h1>Welcome Back, <b><?= e($firstName) ?></b></h1>
         <p><?= $isAdmin ? 'Manage. Monitor. Grow — all in one place.' : 'Teach. Assess. Inspire — all in one place.' ?><?= $term !== null ? ' · ' . e($term['name']) : '' ?></p>
     </div>
-    <span class="pd-pill"><?= icon('calendar', 'h-4 w-4') ?> <?= e($dayName) ?></span>
+    <?php if ($isAdmin): ?>
+        <a class="pd-pill pd-term" href="<?= e(url('/school/academic')) ?>" title="Change the current academic session and term"><?= icon('calendar', 'h-4 w-4') ?> <?= $term !== null ? e($term['session_name'] . ' · ' . $term['name']) : 'Set the current term' ?> <span class="pd-term-go">Change</span></a>
+    <?php else: ?>
+        <span class="pd-pill"><?= icon('calendar', 'h-4 w-4') ?> <?= $term !== null ? e($term['session_name'] . ' · ' . $term['name']) : e($dayName) ?></span>
+    <?php endif; ?>
 </div>
+
+<?php if ($isAdmin && $term === null): ?>
+    <section class="pd-setup">
+        <div><b>No current term is set</b><span>Exams and results are filed under the current term. Create the session and choose the term.</span></div>
+        <a class="btn btn-primary" href="<?= e(url('/school/academic')) ?>"><?= icon('calendar', 'h-4 w-4') ?><span>Set up the academic year</span></a>
+    </section>
+<?php endif; ?>
 
 <?php if ($isAdmin && $needsSetup): ?>
     <section class="pd-setup">

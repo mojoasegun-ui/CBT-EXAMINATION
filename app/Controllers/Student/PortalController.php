@@ -71,10 +71,24 @@ final class PortalController extends BasePortal
     public function dashboard(Request $request): Response
     {
         $student = $this->students->find($this->tenant->id(), (int) $this->guard->id());
+        $schoolId = $this->tenant->id();
+        $studentId = (int) $this->guard->id();
+        // Scores are shown only once the school has released them (same rule as the results page).
+        $released = array_values(array_filter($this->container->get(\ExamCore\Services\ResultService::class)->studentResults($schoolId, $studentId), static fn (array $r): bool => $r['visible']));
+        $percents = array_map(static fn (array $r): float => (float) $r['percent'], $released);
+        $days = $this->container->get(\ExamCore\Models\Practice::class)->days('s:' . $studentId, 60);
+        $today = \ExamCore\Services\PracticeService::today();
+        $trendRows = array_slice($released, 0, 8);
         return $this->page($request, 'student/dashboard', [
             'area' => 'student',
             'title' => 'My dashboard',
             'student' => $student,
+            'recent' => array_slice($released, 0, 5),
+            'summary' => ['taken' => count($released), 'avg' => $percents === [] ? null : round(array_sum($percents) / count($percents), 1), 'best' => $percents === [] ? null : max($percents)],
+            'streak' => \ExamCore\Services\PracticeService::streak($days, $today),
+            'answeredToday' => (int) (array_column(array_filter($days, static fn (array $d): bool => $d['day'] === $today), 'answered')[0] ?? 0),
+            'trend' => array_map(static fn (array $r): float => (float) $r['percent'], array_reverse($trendRows)),
+            'trendLabels' => array_map(static fn (array $r): string => mb_strimwidth((string) $r['title'], 0, 12, '…'), array_reverse($trendRows)),
             'subjects' => $student !== null && $student['class_id'] ? $this->subjects->forClass($this->tenant->id(), (int) $student['class_id']) : [],
             'current' => $this->calendar->current($this->tenant->id()),
             'sittings' => $student !== null ? $this->container->get(\ExamCore\Models\ExamSitting::class)->summariesForStudent($this->tenant->id(), (int) $student['id']) : [],

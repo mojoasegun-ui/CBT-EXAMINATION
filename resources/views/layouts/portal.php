@@ -54,7 +54,7 @@ $schoolName = ($school['short_name'] ?? null) ?: ($school['name'] ?? $appName);
 <head>               
     <?php require __DIR__ . '/../partials/portal/head.php'; ?>
 </head>
-<body class="min-h-screen bg-canvas<?= (!$isConsole && !$isStudentArea) ? ' has-bottom' : '' ?>"<?= preg_match("~^/(school|console)/(bank|exams/\d+/papers)~", $currentPath) ? " data-print-protect" : "" ?>>
+<body class="min-h-screen bg-canvas<?= !$isConsole ? ' has-bottom' : '' ?>"<?= preg_match("~^/(school|console)/(bank|exams/\d+/papers)~", $currentPath) ? " data-print-protect" : "" ?>>
 <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[70] focus:rounded-full focus:bg-card focus:px-4 focus:py-2 focus:shadow-lg">Skip to content</a>
 <?php require __DIR__ . '/../partials/portal/toasts.php'; ?>
 
@@ -159,6 +159,11 @@ $schoolName = ($school['short_name'] ?? null) ?: ($school['name'] ?? $appName);
         </div>
     </div>
 </dialog>
+<?php if ($isStudentArea): ?>
+<nav class="pd-bottom" aria-label="Quick navigation">
+    <?php foreach ([['/student', 'dashboard', 'Home'], ['/practice', 'sparkles', 'Practice'], ['/student/results', 'chart', 'Results'], ['/student/announcements', 'bell', 'Notices']] as [$href, $iconName, $label]): ?><a href="<?= e(url($href)) ?>" <?= $isActive($href) ? 'aria-current="page"' : '' ?>><?= icon($iconName, 'h-[22px] w-[22px]') ?><span><?= e($label) ?></span></a><?php endforeach; ?>
+</nav>
+<?php endif; ?>
 <?php if (!$isConsole && !$isStudentArea): $isAdminRole = ($user['role'] ?? '') === 'school_admin';
     $bottom = [['/school', 'dashboard', 'Home'], ['/school/exams', 'calendar', 'My Exams'], [$isAdminRole ? '/school/results' : '/school/my-classes', $isAdminRole ? 'chart' : 'school', $isAdminRole ? 'Results' : 'Classes'], ['/school/announcements', 'bell', 'Notices']]; ?>
 <nav class="pd-bottom" aria-label="Quick navigation">

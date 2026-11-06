@@ -708,3 +708,25 @@ img, svg, video, canvas { max-width: 100%; }
   .pd-bottom a{padding:.55rem 0 .6rem}
   .pd-bottom a[aria-current=page] svg{filter:drop-shadow(0 3px 4px rgba(37,99,235,.45))}
 }
+
+/* ---- Student dashboard bits, term chip, and a phone-friendly flyer/QR page ---- */
+.pd-term{text-decoration:none;cursor:pointer}
+.pd-term-go{margin-left:.35rem;padding:.1rem .5rem;border-radius:9999px;background:#dbeafe;color:#1d4ed8;font-size:.72rem;font-weight:700}
+.pd-exams li{align-items:center}
+.pd-act{display:flex;align-items:center;gap:.5rem;flex:none}
+.pd-banner.pd-next small{font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:.75rem}
+.pd-banner.pd-next h1{font-size:clamp(1.3rem,4.4vw,2rem)}
+@media screen and (max-width:700px){
+  .flyer-sheet{padding:.5rem;gap:.75rem;max-width:100%}
+  .flyer-sheet .flyer{padding:1.1rem;min-height:0}
+  .flyer-sheet .flyer-title{font-size:1.7rem;margin-top:1rem}
+  .flyer-sheet .flyer-sub{font-size:.95rem;margin-top:.6rem}
+  .flyer-sheet .flyer-body{flex-direction:column;gap:1.2rem;padding:1.2rem 0}
+  .flyer-sheet .flyer-qr{width:min(76vw,17rem);height:auto;aspect-ratio:1}
+  .flyer-sheet .flyer-steps{font-size:.95rem;width:100%}
+  .flyer-sheet .flyer-url{word-break:break-word;margin-top:.8rem}
+  .flyer-sheet.flyer-cards{grid-template-columns:1fr}
+  .flyer-sheet.flyer-cards .flyer-qr{width:9rem}
+  .flyer-sheet.flyer-cards .flyer-title{font-size:1.1rem}
+  .flyer-sheet.flyer-a5{grid-template-rows:none}
+}
