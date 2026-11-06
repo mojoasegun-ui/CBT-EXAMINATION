@@ -155,6 +155,23 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
                     <fieldset>
                         <legend class="mb-4 flex items-center gap-3 font-display text-lg font-bold text-ink"><span class="grid h-8 w-8 place-items-center rounded-full bg-blue-100 text-sm font-extrabold text-primary">02</span> Subject</legend>
                         <label class="relative mb-3 block"><span class="sr-only">Search subjects</span><svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg><input class="min-h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-ink placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-slate-100" type="search" placeholder="Search subjects" autocomplete="off" data-subject-search disabled></label>
+                        <div class="stream-chips mb-3 hidden" data-stream-wrap>
+                            <p class="mb-1.5 text-[11px] font-extrabold uppercase tracking-[.16em] text-slate-400">Your class / stream</p>
+                            <div class="flex flex-wrap gap-2" role="group" aria-label="Filter subjects by stream" data-stream-chips>
+                                <button type="button" class="stream-chip is-on" data-stream="all" aria-pressed="true">All subjects</button>
+                                <button type="button" class="stream-chip" data-stream="science" aria-pressed="false">🔬 Science</button>
+                                <button type="button" class="stream-chip" data-stream="commercial" aria-pressed="false">📊 Commercial</button>
+                                <button type="button" class="stream-chip" data-stream="arts" aria-pressed="false">🎭 Arts</button>
+                            </div>
+                        </div>
+                        <div class="mb-3 hidden rounded-xl border border-amber-200 bg-amber-50 p-3" data-course-wrap>
+                            <label for="jamb-course" class="block text-xs font-extrabold uppercase tracking-[.14em] text-amber-700">JAMB: what will you study?</label>
+                            <select id="jamb-course" class="mt-2 min-h-11 w-full rounded-xl border border-amber-200 bg-white px-3 text-sm text-ink focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" data-course-select>
+                                <option value="">Show all subjects</option>
+                            </select>
+                            <p class="mt-2 hidden text-sm font-semibold text-ink" data-course-combo></p>
+                            <a class="mt-2 hidden text-sm font-bold text-primary underline underline-offset-4" href="<?= e(url('/practice/mock')) ?>" data-course-mock>Take the full JAMB mock exam →</a>
+                        </div>
                         <p class="mb-2 text-xs font-semibold text-muted" data-subject-count aria-live="polite">Select an exam type to load subjects.</p>
                         <button type="button" class="mb-3 min-h-10 rounded-lg px-2 text-sm font-bold text-primary underline decoration-primary/30 underline-offset-4 hover:text-primary-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600" data-subject-browse hidden>Browse all subjects</button>
                         <div class="grid max-h-[28rem] grid-cols-2 gap-2 overflow-y-auto pr-1 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3" data-subjects aria-live="polite">

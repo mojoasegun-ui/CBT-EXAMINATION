@@ -178,11 +178,71 @@
         return button;
     };
 
+    // Streams as Nigerian schools use them. Core subjects belong to every stream.
+    const CORE = ["English Language", "Mathematics", "Civic Education"];
+    const STREAMS = {
+        science: ["Biology", "Chemistry", "Physics", "Further Mathematics", "Agricultural Science", "Geography", "Computer Studies", "Data Processing", "Health Education", "Food and Nutrition", "Animal Husbandry", "Technical Drawing", "Basic Electricity", "Building Construction", "Woodwork"],
+        commercial: ["Economics", "Commerce", "Financial Accounting", "Business Studies", "Marketing", "Office Practice", "Government", "Data Processing", "Geography"],
+        arts: ["Literature", "Government", "Christian Religious Studies", "Islamic Studies", "Arabic", "French", "Visual Arts", "Geography", "Economics"]
+    };
+    // JAMB = English + three subjects that fit the course (the usual combinations).
+    const COURSES = {
+        "Medicine and Surgery": ["Biology", "Chemistry", "Physics"],
+        "Pharmacy": ["Biology", "Chemistry", "Physics"],
+        "Nursing": ["Biology", "Chemistry", "Physics"],
+        "Engineering": ["Mathematics", "Physics", "Chemistry"],
+        "Computer Science": ["Mathematics", "Physics", "Chemistry"],
+        "Architecture": ["Mathematics", "Physics", "Chemistry"],
+        "Agriculture": ["Biology", "Chemistry", "Agricultural Science"],
+        "Law": ["Literature", "Government", "Christian Religious Studies"],
+        "Accounting": ["Mathematics", "Economics", "Government"],
+        "Economics": ["Mathematics", "Economics", "Government"],
+        "Business Administration": ["Mathematics", "Economics", "Government"],
+        "Mass Communication": ["Literature", "Government", "Economics"],
+        "Political Science": ["Government", "Economics", "Literature"]
+    };
+    const streamWrap = form.querySelector("[data-stream-wrap]");
+    const streamChips = [...form.querySelectorAll("[data-stream]")];
+    const courseWrap = form.querySelector("[data-course-wrap]");
+    const courseSelect = form.querySelector("[data-course-select]");
+    const courseCombo = form.querySelector("[data-course-combo]");
+    const courseMock = form.querySelector("[data-course-mock]");
+    const STREAM_KEY = "examcore-stream";
+    let activeStream = "all";
+    let activeCourse = "";
+    try { activeStream = localStorage.getItem(STREAM_KEY) || "all"; } catch (e) { activeStream = "all"; }
+    if (courseSelect) Object.keys(COURSES).forEach((name) => courseSelect.append(new Option(name, name)));
+
+    const paintStreams = () => streamChips.forEach((chip) => {
+        const on = chip.dataset.stream === activeStream;
+        chip.classList.toggle("is-on", on);
+        chip.setAttribute("aria-pressed", String(on));
+    });
+    const inStream = (name) => activeStream === "all" || CORE.includes(name) || (STREAMS[activeStream] || []).includes(name);
+    const inCourse = (name) => !activeCourse || name === "English Language" || COURSES[activeCourse].includes(name);
+
+    streamChips.forEach((chip) => chip.addEventListener("click", () => {
+        activeStream = chip.dataset.stream;
+        try { localStorage.setItem(STREAM_KEY, activeStream); } catch (e) { /* storage may be blocked */ }
+        paintStreams();
+        renderSubjects();
+    }));
+    courseSelect?.addEventListener("change", () => {
+        activeCourse = courseSelect.value;
+        if (courseCombo) {
+            courseCombo.classList.toggle("hidden", !activeCourse);
+            courseCombo.textContent = activeCourse ? `Your JAMB subjects for ${activeCourse}: English Language · ${COURSES[activeCourse].join(" · ")}` : "";
+        }
+        courseMock?.classList.toggle("hidden", !activeCourse);
+        renderSubjects();
+    });
+    paintStreams();
+
     const renderSubjects = () => {
         const searchTerm = subjectSearch.value.trim().toLocaleLowerCase();
         const availableSubjects = loadedSubjects.filter((subject) => Number(subject.available_exam_count || 0) > 0);
         const subjectsToShow = showAllSubjects || searchTerm ? loadedSubjects : availableSubjects;
-        const visibleSubjects = subjectsToShow.filter((subject) => subject.name.toLocaleLowerCase().includes(searchTerm));
+        const visibleSubjects = subjectsToShow.filter((subject) => subject.name.toLocaleLowerCase().includes(searchTerm) && inStream(subject.name) && inCourse(subject.name));
         subjectBrowse.hidden = loadedSubjects.length <= availableSubjects.length || searchTerm !== "";
         subjectBrowse.textContent = showAllSubjects ? "Show available subjects only" : `Browse all ${loadedSubjects.length} subjects`;
         subjectGrid.replaceChildren();
@@ -206,6 +266,9 @@
         }
         subjectSearch.value = "";
         subjectSearch.disabled = true;
+        if (streamWrap) streamWrap.classList.toggle("hidden", !activeType);
+        if (courseWrap) courseWrap.classList.toggle("hidden", activeType !== "jamb");
+        if (activeType !== "jamb" && activeCourse) { activeCourse = ""; if (courseSelect) courseSelect.value = ""; courseCombo?.classList.add("hidden"); courseMock?.classList.add("hidden"); }
         yearStep.classList.add("hidden");
         selectorGrid.classList.remove("lg:grid-cols-3");
         selectorGrid.classList.add("lg:grid-cols-2");
