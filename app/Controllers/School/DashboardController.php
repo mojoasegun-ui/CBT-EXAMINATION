@@ -35,6 +35,7 @@ final class DashboardController extends SchoolController
         private readonly AuditLog $auditLogs,
         private readonly SchoolSetupService $setup,
         private readonly StudentService $studentService,
+        private readonly \ExamCore\Models\DashboardStats $dash,
     ) {
         parent::__construct($container, $view, $guard, $session, $csrf, $tenant);
     }
@@ -48,6 +49,8 @@ final class DashboardController extends SchoolController
         $current = $this->calendar->current($schoolId);
         $subjectCount = count($this->subjects->all($schoolId, true));
         $teacherCount = ($staff['teacher'] ?? 0);
+        $isAdmin = $this->guard->role() === User::ROLE_SCHOOL_ADMIN;
+        $authorId = $isAdmin ? null : (int) $this->guard->id();
 
         return $this->page($request, 'school/dashboard', $this->base('Dashboard') + [
             'isAdmin' => $this->guard->role() === User::ROLE_SCHOOL_ADMIN,
@@ -76,6 +79,11 @@ final class DashboardController extends SchoolController
                 ['School logo uploaded', !empty($this->tenant->school()['logo_path']), '/school/settings'],
             ],
             'activity' => $this->auditLogs->search($schoolId, '', 1, 6)['rows'],
+            'examCounts' => $this->dash->examCounts($schoolId, $authorId),
+            'totals' => $this->dash->schoolTotals($schoolId, $authorId),
+            'performance' => $this->dash->performance($schoolId, $authorId, 8),
+            'live' => $this->dash->schoolLive($schoolId, $authorId, 4),
+            'myStudents' => $isAdmin ? $activeStudents : $this->dash->teacherStudents($schoolId, (int) $this->guard->id()),
         ]);
     }
 

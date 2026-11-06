@@ -41,6 +41,7 @@ final class ConsoleController extends PortalController
         private readonly Database $database,
         private readonly AuditService $audit,
         private readonly BackupService $backups,
+        private readonly \ExamCore\Models\DashboardStats $stats,
     ) {
         parent::__construct($container, $view, $guard, $session, $csrf);
     }
@@ -60,6 +61,10 @@ final class ConsoleController extends PortalController
             'students' => $byRole['student'] ?? 0,
             'staff' => ($byRole['school_admin'] ?? 0) + ($byRole['teacher'] ?? 0) + ($byRole['reviewer'] ?? 0),
             'attemptSeries' => $series,
+            'sittingSeries' => $this->stats->sittingsDaily(14),
+            'live' => $this->stats->liveSittings(6),
+            'liveCount' => $this->stats->liveCount(),
+            'bankCount' => $this->stats->bankCount(),
             'attemptsToday' => $series[count($series) - 1]['count'] ?? 0,
             'attemptsTotal14' => array_sum(array_column($series, 'count')),
             'queue' => $this->queue->stats(),

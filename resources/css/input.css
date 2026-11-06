@@ -53,7 +53,7 @@ body.menu-open::before{content:"";position:fixed;inset:0;z-index:30;background:r
 .hero-grid{position:absolute;inset:0;pointer-events:none;opacity:.18;background-image:linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);background-size:44px 44px;-webkit-mask-image:radial-gradient(ellipse at 70% 40%,#000 0,transparent 70%);mask-image:radial-gradient(ellipse at 70% 40%,#000 0,transparent 70%);animation:ec-grid 24s linear infinite}
 @keyframes ec-grid{to{background-position:44px 44px}}
 .hero-bits{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.hero-bits b{position:absolute;bottom:-3rem;font:800 1.4rem/1 var(--font-display,inherit);color:rgba(255,255,255,.22);animation:ec-rise 16s linear infinite}
+.hero-bits b{position:absolute;bottom:-3rem;font:800 1.4rem/1 "Plus Jakarta Sans",Inter,ui-sans-serif,system-ui,sans-serif;color:rgba(255,255,255,.22);animation:ec-rise 16s linear infinite}
 .hero-bits b:nth-child(1){left:6%;animation-duration:15s}.hero-bits b:nth-child(2){left:19%;animation-duration:19s;animation-delay:-6s}
 .hero-bits b:nth-child(3){left:33%;animation-duration:14s;animation-delay:-3s}.hero-bits b:nth-child(4){left:47%;animation-duration:21s;animation-delay:-9s}
 .hero-bits b:nth-child(5){left:61%;animation-duration:17s;animation-delay:-12s}.hero-bits b:nth-child(6){left:74%;animation-duration:20s;animation-delay:-4s}
@@ -91,7 +91,7 @@ body.menu-open::before{content:"";position:fixed;inset:0;z-index:30;background:r
 .launch__ring::before{content:"";position:absolute;inset:-8px;border-radius:9999px;border:3px solid transparent;border-top-color:#fbbf24;border-right-color:rgba(251,191,36,.35);animation:ec-spin 1s linear infinite}
 .launch__ring svg{width:2.8rem;height:2.8rem;animation:ec-bob 2s ease-in-out infinite}
 @keyframes ec-pulse{to{box-shadow:0 0 0 28px rgba(251,191,36,0)}}
-.launch__hello{font:800 1.9rem/1.15 var(--font-display,inherit);color:#fcd34d}
+.launch__hello{font:800 1.9rem/1.15 "Plus Jakarta Sans",Inter,ui-sans-serif,system-ui,sans-serif;color:#fcd34d}
 .launch__title{margin-top:.35rem;color:#bfdbfe;font-weight:600}
 .launch__steps{margin:1.5rem auto 0;display:grid;gap:.6rem;max-width:16rem;text-align:left;list-style:none;padding:0}
 .launch__steps li{display:flex;align-items:center;gap:.7rem;font-size:.95rem;color:rgba(255,255,255,.55);transition:color .3s ease}

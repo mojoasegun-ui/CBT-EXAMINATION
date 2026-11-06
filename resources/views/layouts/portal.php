@@ -54,7 +54,7 @@ $schoolName = ($school['short_name'] ?? null) ?: ($school['name'] ?? $appName);
 <head>               
     <?php require __DIR__ . '/../partials/portal/head.php'; ?>
 </head>
-<body class="min-h-screen bg-canvas"<?= preg_match("~^/(school|console)/(bank|exams/\d+/papers)~", $currentPath) ? " data-print-protect" : "" ?>>
+<body class="min-h-screen bg-canvas<?= (!$isConsole && !$isStudentArea) ? ' has-bottom' : '' ?>"<?= preg_match("~^/(school|console)/(bank|exams/\d+/papers)~", $currentPath) ? " data-print-protect" : "" ?>>
 <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[70] focus:rounded-full focus:bg-card focus:px-4 focus:py-2 focus:shadow-lg">Skip to content</a>
 <?php require __DIR__ . '/../partials/portal/toasts.php'; ?>
 
@@ -137,6 +137,7 @@ $schoolName = ($school['short_name'] ?? null) ?: ($school['name'] ?? $appName);
             <?php endif; ?>
             <span class="relative inline-flex"><a href="<?= e(url($homePath . '/announcements')) ?>" class="btn btn-secondary btn-icon" aria-label="Announcements<?= ($unread ?? 0) > 0 ? ', ' . (int) $unread . ' unread' : '' ?>" title="Announcements"><?= icon('bell', 'h-[18px] w-[18px]') ?></a><?php if (($unread ?? 0) > 0): ?><span class="pointer-events-none absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[11px] font-bold leading-none text-white ring-2 ring-white" aria-hidden="true"><?= $unread > 99 ? '99+' : (int) $unread ?></span><?php endif; ?></span>
             <button type="button" class="btn btn-secondary btn-icon hidden" data-install-app aria-label="Install the app" title="Install the app"><?= icon('download', 'h-[18px] w-[18px]') ?></button>
+            <span class="pd-me"><span class="av"><?= e(initials((string) $user['name'])) ?></span><span><b><?= e(explode(' ', trim((string) $user['name']))[0]) ?></b><small><?= e($roleLabels[$user['role']] ?? $user['role']) ?></small></span></span>
             <button type="button" class="btn btn-secondary btn-icon" data-theme-toggle aria-label="Toggle dark mode" title="Toggle dark mode"><?= icon('moon', 'h-[18px] w-[18px] dark:hidden') ?><?= icon('sun', 'hidden h-[18px] w-[18px] dark:block') ?></button>
         </div>
     </header>
@@ -158,5 +159,11 @@ $schoolName = ($school['short_name'] ?? null) ?: ($school['name'] ?? $appName);
         </div>
     </div>
 </dialog>
+<?php if (!$isConsole && !$isStudentArea): $isAdminRole = ($user['role'] ?? '') === 'school_admin';
+    $bottom = [['/school', 'dashboard', 'Home'], ['/school/exams', 'calendar', 'My Exams'], [$isAdminRole ? '/school/results' : '/school/my-classes', $isAdminRole ? 'chart' : 'school', $isAdminRole ? 'Results' : 'Classes'], ['/school/announcements', 'bell', 'Notices']]; ?>
+<nav class="pd-bottom" aria-label="Quick navigation">
+    <?php foreach ($bottom as [$href, $iconName, $label]): ?><a href="<?= e(url($href)) ?>" <?= $isActive($href) ? 'aria-current="page"' : '' ?>><?= icon($iconName, 'h-[22px] w-[22px]') ?><span><?= e($label) ?></span></a><?php endforeach; ?>
+</nav>
+<?php endif; ?>
 </body>
 </html>
