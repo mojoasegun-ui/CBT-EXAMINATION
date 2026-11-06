@@ -40,12 +40,15 @@ final class PushController extends Controller
     public function subscribe(Request $request): Response
     {
         $uid = $this->guard->id();
-        $endpoint = (string) ($request->json()['endpoint'] ?? '');
+        $body = $request->json();
+        $endpoint = (string) ($body['endpoint'] ?? '');
+        $p256dh = (string) ($body['keys']['p256dh'] ?? '');
+        $auth = (string) ($body['keys']['auth'] ?? '');
         if (!PushService::publicKey() || strlen($endpoint) > 1000 || !str_starts_with($endpoint, 'https://')) {
             return $this->json(['error' => 'Notifications are not available.'], 422);
         }
         // A signed-in person keeps their account link and also the visitor id, so earlier practice reminders keep working.
-        $this->notes->saveSubscription($uid, $uid !== null ? $this->guard->schoolId() : null, $this->guestKey(true), $endpoint, (string) ($request->header('user-agent') ?? ''));
+        $this->notes->saveSubscription($uid, $uid !== null ? $this->guard->schoolId() : null, $this->guestKey(true), $endpoint, (string) ($request->header('user-agent') ?? ''), $p256dh !== '' && strlen($p256dh) <= 100 ? $p256dh : null, $auth !== '' && strlen($auth) <= 40 ? $auth : null);
         return $this->json(['ok' => true]);
     }
 

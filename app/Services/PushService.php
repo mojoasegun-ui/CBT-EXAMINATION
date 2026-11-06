@@ -6,9 +6,9 @@ namespace ExamCore\Services;
 use ExamCore\Models\Notification;
 
 /**
- * Web Push for Android and iPhone (installed web app, iOS 16.4+). A push is only a wake-up "ping" signed with
- * our VAPID key; the phone's service worker then fetches the real text from the site (/push/pending). That keeps
- * message content off the push providers and avoids payload encryption.
+ * Web Push for Android and iPhone (installed web app, iOS 16.4+). Messages are end-to-end encrypted to the
+ * device (RFC 8291) so the push provider cannot read them, and signed with our VAPID key. A device registered
+ * without keys falls back to a plain wake-up ping after which its service worker fetches the text (/push/pending).
  */
 final class PushService
 {
@@ -85,7 +85,7 @@ final class PushService
         }
         $this->notes->addFor($userIds, $schoolId, $type, $title, $body, $url);
         if ($this->ready()) {
-            $this->ping($this->notes->subscriptionsOf(array_slice(array_values(array_unique($userIds)), 0, 300)));
+            $this->ping($this->notes->subscriptionsOf(array_slice(array_values(array_unique($userIds)), 0, 300)), compact('type', 'title', 'body', 'url'));
         }
     }
 
@@ -94,7 +94,7 @@ final class PushService
     {
         $this->notes->addForGuest($guestKey, $type, $title, $body, $url);
         if ($this->ready()) {
-            $this->ping($this->notes->subscriptionsOfGuest($guestKey));
+            $this->ping($this->notes->subscriptionsOfGuest($guestKey), compact('type', 'title', 'body', 'url'));
         }
     }
 
@@ -119,7 +119,7 @@ final class PushService
                 $this->notes->addForGuest((string) $sub['guest_key'], $type, $title, $body, $url);
             }
             $this->notes->markEngaged((int) $sub['id']);
-            $this->ping([$sub]);
+            $this->ping([$sub], compact('type', 'title', 'body', 'url'));
             $sent++;
         }
         return $sent;
@@ -155,14 +155,63 @@ final class PushService
         return count($subs);
     }
 
-    /** @param list<array<string,mixed>> $subs */
-    private function ping(array $subs): void
+    /**
+     * RFC 8291 "aes128gcm" encryption of one message for one device.
+     *
+     * @param array<string,string> $payload
+     */
+    private static function encrypt(array $payload, string $p256dh, string $auth): ?string
+    {
+        $unb64 = static fn (string $v): string => (string) base64_decode(strtr($v, '-_', '+/') . str_repeat('=', (4 - strlen($v) % 4) % 4), true);
+        $uaPublic = $unb64($p256dh);
+        $authSecret = $unb64($auth);
+        if (strlen($uaPublic) !== 65 || strlen($authSecret) < 8) {
+            return null;
+        }
+        $opts = ['curve_name' => 'prime256v1', 'private_key_type' => OPENSSL_KEYTYPE_EC];
+        $local = openssl_pkey_new($opts);
+        if ($local === false) { // Windows/XAMPP without a findable openssl.cnf (development only)
+            foreach (['C:/xampp/apache/conf/openssl.cnf', 'C:/xampp/php/extras/ssl/openssl.cnf'] as $cnf) {
+                if (is_file($cnf) && ($local = openssl_pkey_new($opts + ['config' => $cnf])) !== false) {
+                    break;
+                }
+            }
+        }
+        if ($local === false) {
+            return null;
+        }
+        $d = openssl_pkey_get_details($local);
+        $asPublic = "\x04" . str_pad($d['ec']['x'], 32, "\0", STR_PAD_LEFT) . str_pad($d['ec']['y'], 32, "\0", STR_PAD_LEFT);
+        $peerPem = "-----BEGIN PUBLIC KEY-----\n" . chunk_split(base64_encode(hex2bin('3059301306072a8648ce3d020106082a8648ce3d030107034200') . $uaPublic), 64, "\n") . "-----END PUBLIC KEY-----\n";
+        $peer = openssl_pkey_get_public($peerPem);
+        $secret = $peer === false ? false : openssl_pkey_derive($peer, $local, 32);
+        if ($secret === false) {
+            return null;
+        }
+        $ikm = hash_hkdf('sha256', $secret, 32, "WebPush: info\0" . $uaPublic . $asPublic, $authSecret);
+        $salt = random_bytes(16);
+        $cek = hash_hkdf('sha256', $ikm, 16, "Content-Encoding: aes128gcm\0", $salt);
+        $nonce = hash_hkdf('sha256', $ikm, 12, "Content-Encoding: nonce\0", $salt);
+        $plain = (string) json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\x02";
+        $cipher = openssl_encrypt($plain, 'aes-128-gcm', $cek, OPENSSL_RAW_DATA, $nonce, $tag, '', 16);
+        if ($cipher === false) {
+            return null;
+        }
+        return $salt . pack('N', 4096) . chr(65) . $asPublic . $cipher . $tag;
+    }
+
+    /**
+     * @param list<array<string,mixed>> $subs
+     * @param array<string,string>|null $payload message to deliver inside the push (devices without keys get a plain ping)
+     */
+    private function ping(array $subs, ?array $payload = null): void
     {
         if ($subs === []) {
             return;
         }
         $multi = curl_multi_init();
         $handles = [];
+        $sentText = [];
         $tokens = [];
         foreach ($subs as $sub) {
             $parts = parse_url((string) $sub['endpoint']);
@@ -171,13 +220,13 @@ final class PushService
             }
             $aud = 'https://' . $parts['host'] . (isset($parts['port']) ? ':' . $parts['port'] : '');
             $tokens[$aud] ??= $this->jwt($aud);
+            $body = $payload !== null && !empty($sub['p256dh']) && !empty($sub['auth']) ? self::encrypt($payload, (string) $sub['p256dh'], (string) $sub['auth']) : null;
+            $headers = ['Authorization: vapid t=' . $tokens[$aud] . ', k=' . self::publicKey(), 'TTL: 86400', 'Urgency: high'];
+            $headers = $body !== null ? [...$headers, 'Content-Encoding: aes128gcm', 'Content-Type: application/octet-stream', 'Content-Length: ' . strlen($body)] : [...$headers, 'Content-Length: 0'];
             $ch = curl_init((string) $sub['endpoint']);
-            curl_setopt_array($ch, [
-                CURLOPT_POST => true, CURLOPT_POSTFIELDS => '', CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 8, CURLOPT_CONNECTTIMEOUT => 5,
-                CURLOPT_HTTPHEADER => ['Authorization: vapid t=' . $tokens[$aud] . ', k=' . self::publicKey(), 'TTL: 86400', 'Urgency: high', 'Content-Length: 0'],
-            ]);
+            curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => $body ?? '', CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 8, CURLOPT_CONNECTTIMEOUT => 5, CURLOPT_HTTPHEADER => $headers]);
             curl_multi_add_handle($multi, $ch);
-            $handles[(int) $sub['id']] = $ch;
+            $handles[(int) $sub['id']] = [$ch, $sub, $body !== null];
         }
         do {
             $status = curl_multi_exec($multi, $active);
@@ -185,12 +234,17 @@ final class PushService
                 curl_multi_select($multi, 1.0);
             }
         } while ($active && $status === CURLM_OK);
-        foreach ($handles as $id => $ch) {
+        foreach ($handles as $id => [$ch, $sub, $withText]) {
             $code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-            $this->notes->markResult($id, $code >= 200 && $code < 300, in_array($code, [404, 410], true));
+            $ok = $code >= 200 && $code < 300;
+            $this->notes->markResult($id, $ok, in_array($code, [404, 410], true));
+            if ($ok && $withText) {
+                $this->notes->markDeliveredFor($sub['user_id'] !== null ? (int) $sub['user_id'] : null, $sub['guest_key'] ?? null);
+            }
             curl_multi_remove_handle($multi, $ch);
             curl_close($ch);
         }
         curl_multi_close($multi);
+        unset($sentText);
     }
 }

@@ -8,7 +8,7 @@
  *   browser's error screen.
  * - Anything that is not a GET (sign-in, saving answers, submitting) bypasses the worker.
  */
-const VERSION = "examcore-2026-11-10a";
+const VERSION = "examcore-2026-11-10b";
 const STATIC_CACHE = `${VERSION}-static`;
 const MAX_STATIC_ENTRIES = 200;
 const scope = self.registration.scope; // e.g. https://cbt.example.ng/ or http://localhost/CBT-EXAMINATION/
@@ -104,28 +104,37 @@ const KINDS = {
     engage: { vibrate: [100, 60, 100] },
     general: { vibrate: [150] },
 };
+const show = (n) => {
+    const kind = KINDS[n.type] || KINDS.general;
+    return self.registration.showNotification(n.title, {
+        body: n.body,
+        icon: new URL("assets/icons/icon-192.png", scope).href,
+        badge: new URL("assets/icons/icon-192.png", scope).href,
+        tag: `${n.type}-${n.id || Date.now()}`,
+        renotify: true,
+        vibrate: kind.vibrate,
+        requireInteraction: !!kind.requireInteraction,
+        silent: false,
+        data: { url: new URL(String(n.url || "/").replace(/^\//, ""), scope).href },
+    });
+};
 self.addEventListener("push", (event) => {
     event.waitUntil((async () => {
+        // Normal case: the message arrives encrypted inside the push itself.
+        let inline = null;
+        try { inline = event.data ? event.data.json() : null; } catch (error) { inline = null; }
+        if (inline && inline.title) {
+            await show(inline);
+            return;
+        }
+        // Plain wake-up ping: ask the site what to show (the signed-in or visitor cookie says who is asking).
         let items = [];
         try {
             const response = await fetch(new URL("push/pending", scope).href, { credentials: "same-origin", cache: "no-store" });
             if (response.ok) items = (await response.json()).items || [];
         } catch (error) { /* offline: fall back to a generic alert below */ }
         if (!items.length) items = [{ id: Date.now(), type: "general", title: "ExamCore", body: "You have a new update. Tap to open.", url: "/" }];
-        for (const n of items) {
-            const kind = KINDS[n.type] || KINDS.general;
-            await self.registration.showNotification(n.title, {
-                body: n.body,
-                icon: new URL("assets/icons/icon-192.png", scope).href,
-                badge: new URL("assets/icons/icon-192.png", scope).href,
-                tag: `${n.type}-${n.id}`,
-                renotify: true,
-                vibrate: kind.vibrate,
-                requireInteraction: !!kind.requireInteraction,
-                silent: false,
-                data: { url: new URL(String(n.url || "/").replace(/^\//, ""), scope).href },
-            });
-        }
+        for (const n of items) await show(n);
     })());
 });
 self.addEventListener("notificationclick", (event) => {

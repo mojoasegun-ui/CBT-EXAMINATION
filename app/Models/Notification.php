@@ -52,19 +52,19 @@ final class Notification extends Model
         if ($userIds === []) {
             return [];
         }
-        return $this->rows('SELECT id, user_id, endpoint FROM ' . $this->table('push_subscriptions') . ' WHERE user_id IN (' . implode(',', array_fill(0, count($userIds), '?')) . ')', array_map('intval', $userIds));
+        return $this->rows('SELECT id, user_id, guest_key, endpoint, p256dh, auth FROM ' . $this->table('push_subscriptions') . ' WHERE user_id IN (' . implode(',', array_fill(0, count($userIds), '?')) . ')', array_map('intval', $userIds));
     }
 
     public function subscriptionsOfGuest(string $guestKey): array
     {
-        return $this->rows('SELECT id, user_id, endpoint FROM ' . $this->table('push_subscriptions') . ' WHERE guest_key = ?', [$guestKey]);
+        return $this->rows('SELECT id, user_id, guest_key, endpoint, p256dh, auth FROM ' . $this->table('push_subscriptions') . ' WHERE guest_key = ?', [$guestKey]);
     }
 
     /** Subscriptions of people who still have something undelivered (the safety net behind instant sending). */
     public function subscriptionsWithPending(int $limit): array
     {
         $n = $this->table('notifications');
-        return $this->rows('SELECT s.id, s.user_id, s.endpoint FROM ' . $this->table('push_subscriptions') . ' s
+        return $this->rows('SELECT s.id, s.user_id, s.guest_key, s.endpoint, s.p256dh, s.auth FROM ' . $this->table('push_subscriptions') . ' s
             WHERE EXISTS (SELECT 1 FROM ' . $n . ' n WHERE n.delivered_at IS NULL AND n.created_at > ? AND ((s.user_id IS NOT NULL AND n.user_id = s.user_id) OR (s.guest_key IS NOT NULL AND n.guest_key = s.guest_key))) LIMIT ' . max(1, $limit),
             [gmdate('Y-m-d H:i:s', time() - 3600)]);
     }
@@ -72,7 +72,7 @@ final class Notification extends Model
     /** Devices that have been away long enough for a "come back" nudge (at most one per day, five in a row). */
     public function engageCandidates(int $limit): array
     {
-        return $this->rows('SELECT id, user_id, guest_key, endpoint, engage_count FROM ' . $this->table('push_subscriptions') . '
+        return $this->rows('SELECT id, user_id, guest_key, endpoint, p256dh, auth, engage_count FROM ' . $this->table('push_subscriptions') . '
             WHERE last_seen_at < ? AND last_seen_at > ? AND (last_engage_at IS NULL OR last_engage_at < ?) AND engage_count < 5 ORDER BY id LIMIT ' . max(1, $limit),
             [gmdate('Y-m-d H:i:s', time() - 20 * 3600), gmdate('Y-m-d H:i:s', time() - 21 * 86400), gmdate('Y-m-d H:i:s', time() - 22 * 3600)]);
     }
@@ -83,12 +83,13 @@ final class Notification extends Model
     }
 
     /** Register or refresh a device; opening the app resets the "come back" counter. */
-    public function saveSubscription(?int $userId, ?int $schoolId, ?string $guestKey, string $endpoint, string $device): void
+    public function saveSubscription(?int $userId, ?int $schoolId, ?string $guestKey, string $endpoint, string $device, ?string $p256dh = null, ?string $auth = null): void
     {
         $now = gmdate('Y-m-d H:i:s');
-        $this->run('INSERT INTO ' . $this->table('push_subscriptions') . ' (user_id, school_id, guest_key, endpoint_hash, endpoint, device, created_at, last_seen_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE user_id = VALUES(user_id), school_id = VALUES(school_id), guest_key = COALESCE(VALUES(guest_key), guest_key), fails = 0, engage_count = 0, last_seen_at = VALUES(last_seen_at)',
-            [$userId, $schoolId, $guestKey, hash('sha256', $endpoint), $endpoint, mb_substr($device, 0, 160), $now, $now]);
+        $this->run('INSERT INTO ' . $this->table('push_subscriptions') . ' (user_id, school_id, guest_key, endpoint_hash, endpoint, device, created_at, last_seen_at, p256dh, auth) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE user_id = COALESCE(VALUES(user_id), user_id), school_id = COALESCE(VALUES(school_id), school_id), guest_key = COALESCE(VALUES(guest_key), guest_key),
+                p256dh = COALESCE(VALUES(p256dh), p256dh), auth = COALESCE(VALUES(auth), auth), fails = 0, engage_count = 0, last_seen_at = VALUES(last_seen_at)',
+            [$userId, $schoolId, $guestKey, hash('sha256', $endpoint), $endpoint, mb_substr($device, 0, 160), $now, $now, $p256dh, $auth]);
     }
 
     public function removeSubscription(?int $userId, ?string $guestKey, string $endpoint): void
@@ -114,6 +115,16 @@ final class Notification extends Model
     {
         return $this->row('SELECT subject, body FROM ' . $this->table('bank_questions') . " WHERE school_id IS NULL AND status = 'published' AND passage_id IS NULL AND image_path IS NULL
             AND CHAR_LENGTH(body) BETWEEN 25 AND 110 AND body NOT LIKE '%\n%' ORDER BY MOD(id * 7919 + ?, 10007) LIMIT 1", [$seed]);
+    }
+
+    /** The text already reached this device inside the push, so it must not be shown a second time. */
+    public function markDeliveredFor(?int $userId, ?string $guestKey): void
+    {
+        if ($userId !== null) {
+            $this->run('UPDATE ' . $this->table('notifications') . ' SET delivered_at = ? WHERE user_id = ? AND delivered_at IS NULL', [gmdate('Y-m-d H:i:s'), $userId]);
+        } elseif ($guestKey !== null) {
+            $this->run('UPDATE ' . $this->table('notifications') . ' SET delivered_at = ? WHERE guest_key = ? AND delivered_at IS NULL', [gmdate('Y-m-d H:i:s'), $guestKey]);
+        }
     }
 
     public function purgeOld(): int
