@@ -12,7 +12,7 @@ use ExamCore\Models\Notification;
  */
 final class PushService
 {
-    public function __construct(private readonly Notification $notes)
+    public function __construct(private readonly Notification $notes, private readonly \ExamCore\Models\Practice $practice)
     {
     }
 
@@ -87,6 +87,60 @@ final class PushService
         if ($this->ready()) {
             $this->ping($this->notes->subscriptionsOf(array_slice(array_values(array_unique($userIds)), 0, 300)));
         }
+    }
+
+    /** Same as notify(), for an anonymous visitor identified by the practice cookie. */
+    public function notifyGuest(string $guestKey, string $type, string $title, string $body, string $url): void
+    {
+        $this->notes->addForGuest($guestKey, $type, $title, $body, $url);
+        if ($this->ready()) {
+            $this->ping($this->notes->subscriptionsOfGuest($guestKey));
+        }
+    }
+
+    /**
+     * "Come back" nudges, from real activity: an unfinished practice, a streak about to break, or a quick question.
+     * One per device per day, only in the afternoon (Nigeria time), never to someone who just visited, and it
+     * stops by itself after five unanswered nudges or three weeks away.
+     */
+    public function engage(int $limit = 100): int
+    {
+        $hourWat = ((int) gmdate('G') + 1) % 24;
+        if (!$this->ready() || $hourWat < 15 || $hourWat > 19) {
+            return 0;
+        }
+        $sent = 0;
+        foreach ($this->notes->engageCandidates($limit) as $sub) {
+            $owner = $sub['user_id'] !== null ? 's:' . (int) $sub['user_id'] : 'g:' . $sub['guest_key'];
+            [$type, $title, $body, $url] = $this->nudgeFor($owner, (int) $sub['id']);
+            if ($sub['user_id'] !== null) {
+                $this->notes->addFor([(int) $sub['user_id']], null, $type, $title, $body, $url);
+            } else {
+                $this->notes->addForGuest((string) $sub['guest_key'], $type, $title, $body, $url);
+            }
+            $this->notes->markEngaged((int) $sub['id']);
+            $this->ping([$sub]);
+            $sent++;
+        }
+        return $sent;
+    }
+
+    /** @return array{0:string,1:string,2:string,3:string} type, title, body, url */
+    private function nudgeFor(string $ownerKey, int $seed): array
+    {
+        $open = $this->practice->openSession($ownerKey);
+        if ($open !== null) {
+            return ['engage', 'Pick up where you left off', 'Your “' . mb_substr((string) $open['title'], 0, 60) . '” is waiting for you.', '/practice/s/' . $open['token']];
+        }
+        $streak = PracticeService::streak($this->practice->days($ownerKey, 60), PracticeService::today());
+        if ($streak['current'] >= 2) {
+            return ['engage', 'Keep your ' . $streak['current'] . '-day streak alive', 'Answer a few questions today so it does not break.', '/practice'];
+        }
+        $q = $this->notes->teaser((int) gmdate('z') * 31 + $seed);
+        if ($q !== null) {
+            return ['engage', 'Quick one: ' . $q['subject'], (string) $q['body'], '/practice/subject/' . PracticeService::slug((string) $q['subject'])];
+        }
+        return ['engage', 'Time for a little practice', 'Ten questions take about five minutes. Tap to start.', '/practice'];
     }
 
     /** Safety net run by the scheduler: wake phones that still have something waiting. */

@@ -15,6 +15,7 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
     <title>Practice CBT | <?= e($appName) ?></title>
     <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
     <script defer src="<?= e(asset('js/selector.js')) ?>"></script>
+    <script defer src="<?= e(asset('js/push.js')) ?>"></script>
 </head>
 <body class="min-h-screen bg-slate-50 text-ink antialiased">
 <a href="#main-content" class="skip-link">Skip to content</a>
@@ -104,6 +105,18 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
             <div class="stat-card rounded-2xl bg-white p-3 shadow-xl ring-1 ring-slate-200/70 sm:p-5"><span class="mb-2 grid h-9 w-9 place-items-center rounded-full bg-emerald-600 text-white sm:h-11 sm:w-11"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12 5 5L20 6"/></svg></span><p class="font-display text-xl font-extrabold text-ink sm:text-3xl"><span data-count="3">3</span></p><p class="text-[11px] font-medium leading-tight text-slate-500 sm:text-sm">Exam boards</p></div>
         </div>
     </section>
+
+<?php if (\ExamCore\Services\PushService::publicKey() !== ''): ?>
+    <section class="relative z-10 mx-auto mt-6 hidden max-w-7xl items-center gap-4 rounded-2xl bg-white p-4 shadow-xl ring-1 ring-slate-200/70 sm:p-5 lg:mx-auto" data-push-banner data-push-key="<?= e(\ExamCore\Services\PushService::publicKey()) ?>" data-push-base="<?= e(url('/push')) ?>" aria-label="Phone notifications" style="width:calc(100% - 2rem)">
+        <span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-blue-100 text-primary"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span>
+        <div class="min-w-0 flex-1">
+            <p class="font-display text-[15px] font-bold text-ink" data-push-title>Get a daily practice reminder</p>
+            <p class="mt-0.5 text-sm leading-6 text-slate-600" data-push-text>Turn on alerts and we will nudge you to practise, protect your streak and tell you about new question sets.</p>
+        </div>
+        <button type="button" class="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-white shadow-sm transition hover:opacity-90 disabled:opacity-60" data-push-enable>Turn on</button>
+        <button type="button" class="grid h-10 w-10 shrink-0 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100" data-push-dismiss aria-label="Not now"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6 18 18M18 6 6 18"/></svg></button>
+    </section>
+    <?php endif; ?>
 
     <section id="exam-selector" class="relative z-10 mx-auto mt-6 max-w-7xl px-4 pb-14 sm:px-6 lg:px-8" aria-labelledby="selector-title">
         <div class="motion-reveal rounded-2xl bg-white p-5 shadow-xl ring-1 ring-slate-200/70 sm:p-8 lg:p-10" data-reveal>

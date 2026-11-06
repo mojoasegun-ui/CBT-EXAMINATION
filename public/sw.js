@@ -8,7 +8,7 @@
  *   browser's error screen.
  * - Anything that is not a GET (sign-in, saving answers, submitting) bypasses the worker.
  */
-const VERSION = "examcore-2026-11-09a";
+const VERSION = "examcore-2026-11-10a";
 const STATIC_CACHE = `${VERSION}-static`;
 const MAX_STATIC_ENTRIES = 200;
 const scope = self.registration.scope; // e.g. https://cbt.example.ng/ or http://localhost/CBT-EXAMINATION/
@@ -101,6 +101,7 @@ const KINDS = {
     exam: { vibrate: [500, 150, 500, 150, 500], requireInteraction: true },
     result: { vibrate: [120, 80, 120, 80, 400] },
     announcement: { vibrate: [200, 100, 200] },
+    engage: { vibrate: [100, 60, 100] },
     general: { vibrate: [150] },
 };
 self.addEventListener("push", (event) => {

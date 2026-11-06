@@ -20,44 +20,59 @@ final class PushController extends Controller
         parent::__construct($container, $view);
     }
 
+    /** Signed-in account, or the anonymous practice cookie (created here if this visitor has none yet). */
+    private function guestKey(bool $create): ?string
+    {
+        $token = (string) ($_COOKIE['ec_guest'] ?? '');
+        if (preg_match('/^[a-f0-9]{24}$/', $token)) {
+            return $token;
+        }
+        if (!$create) {
+            return null;
+        }
+        $token = bin2hex(random_bytes(12));
+        $params = session_get_cookie_params();
+        setcookie('ec_guest', $token, ['expires' => time() + 400 * 86400, 'path' => $params['path'] ?: '/', 'secure' => (bool) $params['secure'], 'httponly' => true, 'samesite' => 'Lax']);
+        $_COOKIE['ec_guest'] = $token;
+        return $token;
+    }
+
     public function subscribe(Request $request): Response
     {
         $uid = $this->guard->id();
         $endpoint = (string) ($request->json()['endpoint'] ?? '');
-        if ($uid === null) {
-            return $this->json(['error' => 'Sign in first.'], 401);
-        }
         if (!PushService::publicKey() || strlen($endpoint) > 1000 || !str_starts_with($endpoint, 'https://')) {
             return $this->json(['error' => 'Notifications are not available.'], 422);
         }
-        $this->notes->saveSubscription($uid, $this->guard->schoolId(), $endpoint, (string) ($request->header('user-agent') ?? ''));
+        // A signed-in person keeps their account link and also the visitor id, so earlier practice reminders keep working.
+        $this->notes->saveSubscription($uid, $uid !== null ? $this->guard->schoolId() : null, $this->guestKey(true), $endpoint, (string) ($request->header('user-agent') ?? ''));
         return $this->json(['ok' => true]);
     }
 
     public function unsubscribe(Request $request): Response
     {
-        $uid = $this->guard->id();
-        if ($uid !== null) {
-            $this->notes->removeSubscription($uid, (string) ($request->json()['endpoint'] ?? ''));
-        }
+        $this->notes->removeSubscription($this->guard->id(), $this->guestKey(false), (string) ($request->json()['endpoint'] ?? ''));
         return $this->json(['ok' => true]);
     }
 
-    /** A friendly "it works" alert to the person's own phones, sent right after they turn notifications on. */
+    /** A friendly "it works" alert to the person's own phone, sent right after they turn notifications on. */
     public function test(Request $request): Response
     {
         $uid = $this->guard->id();
+        $push = $this->container->get(PushService::class);
         if ($uid !== null) {
-            $this->container->get(PushService::class)->notify([$uid], $this->guard->schoolId(), 'general', 'Notifications are on', 'You will be alerted about exams, results and announcements.', '/');
+            $push->notify([$uid], $this->guard->schoolId(), 'general', 'Notifications are on', 'You will be alerted about exams, results and announcements.', '/');
+        } elseif (($guest = $this->guestKey(false)) !== null) {
+            $push->notifyGuest($guest, 'general', 'Alerts are on', 'We will remind you to practise and tell you about new question sets.', '/practice');
         }
         return $this->json(['ok' => true]);
     }
 
-    /** Called by the service worker after a wake-up ping; the cookie says who is asking. */
+    /** Called by the service worker after a wake-up ping; the cookies say who is asking. */
     public function pending(Request $request): Response
     {
         $uid = $this->guard->id();
-        $items = $uid === null ? [] : $this->notes->takePending($uid);
+        $items = $this->notes->takePending($uid, $uid === null ? $this->guestKey(false) : null);
         return Response::json(['items' => $items], 200, ['Cache-Control' => 'no-store']);
     }
 }

@@ -5,7 +5,10 @@ namespace ExamCore\Models;
 
 use ExamCore\Core\Model;
 
-/** Per-person notification inbox and the phones/browsers registered to be pinged. */
+/**
+ * Per-person notification inbox and the phones/browsers registered to be pinged. A "person" is either a
+ * signed-in user (user_id) or an anonymous visitor (guest_key, the Practice Centre cookie).
+ */
 final class Notification extends Model
 {
     /** @param list<int> $userIds */
@@ -22,15 +25,23 @@ final class Notification extends Model
         }
     }
 
-    /** Undelivered notifications for one person, marked delivered as they are handed out. */
-    public function takePending(int $userId, int $limit = 5): array
+    public function addForGuest(string $guestKey, string $type, string $title, string $body, string $url): void
     {
-        $rows = $this->rows('SELECT id, type, title, body, url FROM ' . $this->table('notifications') . ' WHERE user_id = ? AND delivered_at IS NULL AND created_at > ? ORDER BY id DESC LIMIT ' . max(1, min(10, $limit)),
-            [$userId, gmdate('Y-m-d H:i:s', time() - 3 * 86400)]);
+        $this->run('INSERT INTO ' . $this->table('notifications') . ' (guest_key, type, title, body, url, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+            [$guestKey, $type, mb_substr($title, 0, 120), mb_substr($body, 0, 240), mb_substr($url, 0, 200), gmdate('Y-m-d H:i:s')]);
+    }
+
+    /** Undelivered notifications for one person (account or visitor), marked delivered as they are handed out. */
+    public function takePending(?int $userId, ?string $guestKey, int $limit = 5): array
+    {
+        [$who, $params] = $userId !== null ? ['user_id = ?', [$userId]] : ['guest_key = ?', [(string) $guestKey]];
+        if ($userId === null && $guestKey === null) {
+            return [];
+        }
+        $rows = $this->rows('SELECT id, type, title, body, url FROM ' . $this->table('notifications') . ' WHERE ' . $who . ' AND delivered_at IS NULL AND created_at > ? ORDER BY id DESC LIMIT ' . max(1, min(10, $limit)),
+            [...$params, gmdate('Y-m-d H:i:s', time() - 3 * 86400)]);
         if ($rows !== []) {
-            $ids = array_map('intval', array_column($rows, 'id'));
-            $this->run('UPDATE ' . $this->table('notifications') . ' SET delivered_at = ? WHERE user_id = ? AND delivered_at IS NULL', [gmdate('Y-m-d H:i:s'), $userId]);
-            unset($ids);
+            $this->run('UPDATE ' . $this->table('notifications') . ' SET delivered_at = ? WHERE ' . $who . ' AND delivered_at IS NULL', [gmdate('Y-m-d H:i:s'), ...$params]);
         }
         return array_reverse($rows);
     }
@@ -44,28 +55,46 @@ final class Notification extends Model
         return $this->rows('SELECT id, user_id, endpoint FROM ' . $this->table('push_subscriptions') . ' WHERE user_id IN (' . implode(',', array_fill(0, count($userIds), '?')) . ')', array_map('intval', $userIds));
     }
 
+    public function subscriptionsOfGuest(string $guestKey): array
+    {
+        return $this->rows('SELECT id, user_id, endpoint FROM ' . $this->table('push_subscriptions') . ' WHERE guest_key = ?', [$guestKey]);
+    }
+
     /** Subscriptions of people who still have something undelivered (the safety net behind instant sending). */
     public function subscriptionsWithPending(int $limit): array
     {
+        $n = $this->table('notifications');
         return $this->rows('SELECT s.id, s.user_id, s.endpoint FROM ' . $this->table('push_subscriptions') . ' s
-            WHERE EXISTS (SELECT 1 FROM ' . $this->table('notifications') . ' n WHERE n.user_id = s.user_id AND n.delivered_at IS NULL AND n.created_at > ?) LIMIT ' . max(1, $limit),
+            WHERE EXISTS (SELECT 1 FROM ' . $n . ' n WHERE n.delivered_at IS NULL AND n.created_at > ? AND ((s.user_id IS NOT NULL AND n.user_id = s.user_id) OR (s.guest_key IS NOT NULL AND n.guest_key = s.guest_key))) LIMIT ' . max(1, $limit),
             [gmdate('Y-m-d H:i:s', time() - 3600)]);
     }
 
-    public function saveSubscription(int $userId, ?int $schoolId, string $endpoint, string $device): void
+    /** Devices that have been away long enough for a "come back" nudge (at most one per day, five in a row). */
+    public function engageCandidates(int $limit): array
     {
-        $this->run('INSERT INTO ' . $this->table('push_subscriptions') . ' (user_id, school_id, endpoint_hash, endpoint, device, created_at) VALUES (?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE user_id = VALUES(user_id), school_id = VALUES(school_id), fails = 0', [$userId, $schoolId, hash('sha256', $endpoint), $endpoint, mb_substr($device, 0, 160), gmdate('Y-m-d H:i:s')]);
+        return $this->rows('SELECT id, user_id, guest_key, endpoint, engage_count FROM ' . $this->table('push_subscriptions') . '
+            WHERE last_seen_at < ? AND last_seen_at > ? AND (last_engage_at IS NULL OR last_engage_at < ?) AND engage_count < 5 ORDER BY id LIMIT ' . max(1, $limit),
+            [gmdate('Y-m-d H:i:s', time() - 20 * 3600), gmdate('Y-m-d H:i:s', time() - 21 * 86400), gmdate('Y-m-d H:i:s', time() - 22 * 3600)]);
     }
 
-    public function removeSubscription(int $userId, string $endpoint): void
+    public function markEngaged(int $subscriptionId): void
     {
-        $this->run('DELETE FROM ' . $this->table('push_subscriptions') . ' WHERE user_id = ? AND endpoint_hash = ?', [$userId, hash('sha256', $endpoint)]);
+        $this->run('UPDATE ' . $this->table('push_subscriptions') . ' SET last_engage_at = ?, engage_count = engage_count + 1 WHERE id = ?', [gmdate('Y-m-d H:i:s'), $subscriptionId]);
     }
 
-    public function hasSubscription(int $userId): bool
+    /** Register or refresh a device; opening the app resets the "come back" counter. */
+    public function saveSubscription(?int $userId, ?int $schoolId, ?string $guestKey, string $endpoint, string $device): void
     {
-        return (int) $this->scalar('SELECT COUNT(*) FROM ' . $this->table('push_subscriptions') . ' WHERE user_id = ?', [$userId]) > 0;
+        $now = gmdate('Y-m-d H:i:s');
+        $this->run('INSERT INTO ' . $this->table('push_subscriptions') . ' (user_id, school_id, guest_key, endpoint_hash, endpoint, device, created_at, last_seen_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE user_id = VALUES(user_id), school_id = VALUES(school_id), guest_key = COALESCE(VALUES(guest_key), guest_key), fails = 0, engage_count = 0, last_seen_at = VALUES(last_seen_at)',
+            [$userId, $schoolId, $guestKey, hash('sha256', $endpoint), $endpoint, mb_substr($device, 0, 160), $now, $now]);
+    }
+
+    public function removeSubscription(?int $userId, ?string $guestKey, string $endpoint): void
+    {
+        $this->run('DELETE FROM ' . $this->table('push_subscriptions') . ' WHERE endpoint_hash = ? AND ((? IS NOT NULL AND user_id = ?) OR (? IS NOT NULL AND guest_key = ?))',
+            [hash('sha256', $endpoint), $userId, $userId, $guestKey, $guestKey]);
     }
 
     public function markResult(int $subscriptionId, bool $ok, bool $gone): void
@@ -73,11 +102,18 @@ final class Notification extends Model
         if ($gone) {
             $this->run('DELETE FROM ' . $this->table('push_subscriptions') . ' WHERE id = ?', [$subscriptionId]);
         } elseif ($ok) {
-            $this->run('UPDATE ' . $this->table('push_subscriptions') . ' SET fails = 0, last_ok_at = ? WHERE id = ?', [gmdate('Y-m-d H:i:s'), $subscriptionId]);
+            $this->run('UPDATE ' . $this->table('push_subscriptions') . ' SET fails = 0 WHERE id = ?', [$subscriptionId]);
         } else {
             $this->run('UPDATE ' . $this->table('push_subscriptions') . ' SET fails = fails + 1 WHERE id = ?', [$subscriptionId]);
             $this->run('DELETE FROM ' . $this->table('push_subscriptions') . ' WHERE id = ? AND fails >= 8', [$subscriptionId]);
         }
+    }
+
+    /** A short, real bank question for the daily "quick one" nudge; the same seed gives the same question. */
+    public function teaser(int $seed): ?array
+    {
+        return $this->row('SELECT subject, body FROM ' . $this->table('bank_questions') . " WHERE school_id IS NULL AND status = 'published' AND passage_id IS NULL AND image_path IS NULL
+            AND CHAR_LENGTH(body) BETWEEN 25 AND 110 AND body NOT LIKE '%\n%' ORDER BY MOD(id * 7919 + ?, 10007) LIMIT 1", [$seed]);
     }
 
     public function purgeOld(): int
