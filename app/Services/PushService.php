@@ -112,7 +112,8 @@ final class PushService
         $sent = 0;
         foreach ($this->notes->engageCandidates($limit) as $sub) {
             $owner = $sub['user_id'] !== null ? 's:' . (int) $sub['user_id'] : 'g:' . $sub['guest_key'];
-            [$type, $title, $body, $url] = $this->nudgeFor($owner, (int) $sub['id']);
+            $name = $sub['user_id'] !== null ? $this->notes->firstNameOf((int) $sub['user_id']) : (trim((string) ($sub['display_name'] ?? '')) ?: null);
+            [$type, $title, $body, $url] = $this->nudgeFor($owner, (int) $sub['id'], $name);
             if ($sub['user_id'] !== null) {
                 $this->notes->addFor([(int) $sub['user_id']], null, $type, $title, $body, $url);
             } else {
@@ -126,21 +127,32 @@ final class PushService
     }
 
     /** @return array{0:string,1:string,2:string,3:string} type, title, body, url */
-    private function nudgeFor(string $ownerKey, int $seed): array
+    private function nudgeFor(string $ownerKey, int $seed, ?string $name = null): array
     {
+        $hello = $name !== null && $name !== '' ? 'Hello ' . mb_substr($name, 0, 30) . ', ' : 'Hello, ';
         $open = $this->practice->openSession($ownerKey);
         if ($open !== null) {
-            return ['engage', 'Pick up where you left off', 'Your “' . mb_substr((string) $open['title'], 0, 60) . '” is waiting for you.', '/practice/s/' . $open['token']];
+            return ['engage', $hello . 'pick up where you left off', 'Your “' . mb_substr((string) $open['title'], 0, 60) . '” is waiting for you.', '/practice/s/' . $open['token']];
         }
         $streak = PracticeService::streak($this->practice->days($ownerKey, 60), PracticeService::today());
         if ($streak['current'] >= 2) {
-            return ['engage', 'Keep your ' . $streak['current'] . '-day streak alive', 'Answer a few questions today so it does not break.', '/practice'];
+            return ['engage', $hello . 'keep your ' . $streak['current'] . '-day streak alive', 'Answer a few questions today so it does not break.', '/practice'];
         }
-        $q = $this->notes->teaser((int) gmdate('z') * 31 + $seed);
-        if ($q !== null) {
-            return ['engage', 'Quick one: ' . $q['subject'], (string) $q['body'], '/practice/subject/' . PracticeService::slug((string) $q['subject'])];
+        // Their most practised subject if they have one, otherwise a fresh suggestion; always a real series from the catalogue.
+        $favourite = null;
+        $best = 0;
+        foreach ($this->practice->topicStats($ownerKey) as $row) {
+            $subjects[$row['subject']] = ($subjects[$row['subject']] ?? 0) + $row['attempts'];
+            if ($subjects[$row['subject']] > $best) {
+                $best = $subjects[$row['subject']];
+                $favourite = $row['subject'];
+            }
         }
-        return ['engage', 'Time for a little practice', 'Ten questions take about five minutes. Tap to start.', '/practice'];
+        $set = $this->notes->dailySet($favourite, (int) gmdate('z') * 31 + $seed);
+        if ($set !== null) {
+            return ['engage', $hello . $set['subject'] . ' ' . $set['year'] . ' today', $set['board'] . '-style practice series, ' . $set['total'] . ' questions. Ready when you are.', '/#exam-selector'];
+        }
+        return ['engage', $hello . 'time for a little practice', 'Ten questions take about five minutes. Tap to start.', '/practice'];
     }
 
     /** Safety net run by the scheduler: wake phones that still have something waiting. */

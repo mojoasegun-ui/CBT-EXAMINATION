@@ -44,12 +44,26 @@ final class PushController extends Controller
         $endpoint = (string) ($body['endpoint'] ?? '');
         $p256dh = (string) ($body['keys']['p256dh'] ?? '');
         $auth = (string) ($body['keys']['auth'] ?? '');
+        $name = trim(preg_replace('/[^\p{L}\p{N} .\'-]+/u', '', (string) ($body['name'] ?? '')) ?? '');
+        $name = $name !== '' ? mb_substr((string) preg_split('/\s+/', $name)[0], 0, 60) : null;
         if (!PushService::publicKey() || strlen($endpoint) > 1000 || !str_starts_with($endpoint, 'https://')) {
             return $this->json(['error' => 'Notifications are not available.'], 422);
         }
         // A signed-in person keeps their account link and also the visitor id, so earlier practice reminders keep working.
-        $this->notes->saveSubscription($uid, $uid !== null ? $this->guard->schoolId() : null, $this->guestKey(true), $endpoint, (string) ($request->header('user-agent') ?? ''), $p256dh !== '' && strlen($p256dh) <= 100 ? $p256dh : null, $auth !== '' && strlen($auth) <= 40 ? $auth : null);
+        $this->notes->saveSubscription($uid, $uid !== null ? $this->guard->schoolId() : null, $this->guestKey(true), $endpoint, (string) ($request->header('user-agent') ?? ''), $p256dh !== '' && strlen($p256dh) <= 100 ? $p256dh : null, $auth !== '' && strlen($auth) <= 40 ? $auth : null, $uid === null ? $name : null);
         return $this->json(['ok' => true]);
+    }
+
+    /** One link that works for everyone: takes the signed-in person to their own announcements page. */
+    public function announcements(Request $request): Response
+    {
+        $target = match ($this->guard->role()) {
+            'owner' => '/console/announcements',
+            'student' => '/student/announcements',
+            null => '/',
+            default => '/school/announcements',
+        };
+        return Response::redirect(\ExamCore\Core\Url::to($target), 302);
     }
 
     public function unsubscribe(Request $request): Response

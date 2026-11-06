@@ -130,7 +130,7 @@ final class AnnouncementController extends PortalController
         try {
             $this->container->get(\ExamCore\Services\PushService::class)->notify(
                 array_values(array_diff($this->announcements->recipientIds($schoolId, $audience, $classId > 0 ? $classId : null), [(int) $this->guard->id()])),
-                $schoolId, 'announcement', $title, mb_substr($body, 0, 140), '/' . ($audience === 'teachers' ? 'school' : 'student') . '/announcements'
+                $schoolId, 'announcement', 'New announcement: ' . $title, mb_substr($body, 0, 140), '/announcements'
             );
         } catch (\Throwable) {
             // A notification problem must never stop the post itself.

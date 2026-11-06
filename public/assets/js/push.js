@@ -48,7 +48,11 @@
         if (!sub && Notification.permission === "granted") {
             sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: toKey(key) });
         }
-        if (sub) await post("subscribe", sub.toJSON());
+        if (sub) {
+            let name = "";
+            try { name = (JSON.parse(localStorage.getItem("examcore-profile") || "null") || {}).name || ""; } catch (e) { /* ignore */ }
+            await post("subscribe", { ...sub.toJSON(), name });
+        }
         return sub;
     };
 
@@ -67,7 +71,16 @@
             hide();
             return;
         }
-        if (!remembered()) show();
+        if (remembered()) return;
+        // Gentle by design: visitors see the card from their second visit, a few seconds after the page settles.
+        let visits = 1;
+        if (banner.dataset.pushGuest === "1") {
+            try {
+                visits = Number(localStorage.getItem("examcore-visits") || 0) + 1;
+                localStorage.setItem("examcore-visits", String(visits));
+            } catch (e) { visits = 2; }
+        }
+        if (visits >= 2) window.setTimeout(show, 6000);
     };
 
     enable.addEventListener("click", async () => {
@@ -94,7 +107,7 @@
         }
     });
     dismiss?.addEventListener("click", () => {
-        try { localStorage.setItem(DISMISS_KEY, String(Date.now() + 7 * 864e5)); } catch (e) { /* ignore */ }
+        try { localStorage.setItem(DISMISS_KEY, String(Date.now() + 14 * 864e5)); } catch (e) { /* ignore */ }
         hide();
     });
     start();

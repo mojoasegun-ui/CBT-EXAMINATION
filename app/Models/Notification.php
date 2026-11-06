@@ -72,9 +72,10 @@ final class Notification extends Model
     /** Devices that have been away long enough for a "come back" nudge (at most one per day, five in a row). */
     public function engageCandidates(int $limit): array
     {
-        return $this->rows('SELECT id, user_id, guest_key, endpoint, p256dh, auth, engage_count FROM ' . $this->table('push_subscriptions') . '
-            WHERE last_seen_at < ? AND last_seen_at > ? AND (last_engage_at IS NULL OR last_engage_at < ?) AND engage_count < 5 ORDER BY id LIMIT ' . max(1, $limit),
-            [gmdate('Y-m-d H:i:s', time() - 20 * 3600), gmdate('Y-m-d H:i:s', time() - 21 * 86400), gmdate('Y-m-d H:i:s', time() - 22 * 3600)]);
+        return $this->rows('SELECT id, user_id, guest_key, endpoint, p256dh, auth, engage_count, display_name FROM ' . $this->table('push_subscriptions') . '
+            WHERE last_seen_at < ? AND last_seen_at > ? AND engage_count < 4
+              AND (last_engage_at IS NULL OR (engage_count < 2 AND last_engage_at < ?) OR (engage_count >= 2 AND last_engage_at < ?)) ORDER BY id LIMIT ' . max(1, $limit),
+            [gmdate('Y-m-d H:i:s', time() - 20 * 3600), gmdate('Y-m-d H:i:s', time() - 21 * 86400), gmdate('Y-m-d H:i:s', time() - 22 * 3600), gmdate('Y-m-d H:i:s', time() - 70 * 3600)]);
     }
 
     public function markEngaged(int $subscriptionId): void
@@ -83,13 +84,13 @@ final class Notification extends Model
     }
 
     /** Register or refresh a device; opening the app resets the "come back" counter. */
-    public function saveSubscription(?int $userId, ?int $schoolId, ?string $guestKey, string $endpoint, string $device, ?string $p256dh = null, ?string $auth = null): void
+    public function saveSubscription(?int $userId, ?int $schoolId, ?string $guestKey, string $endpoint, string $device, ?string $p256dh = null, ?string $auth = null, ?string $name = null): void
     {
         $now = gmdate('Y-m-d H:i:s');
-        $this->run('INSERT INTO ' . $this->table('push_subscriptions') . ' (user_id, school_id, guest_key, endpoint_hash, endpoint, device, created_at, last_seen_at, p256dh, auth) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        $this->run('INSERT INTO ' . $this->table('push_subscriptions') . ' (user_id, school_id, guest_key, endpoint_hash, endpoint, device, created_at, last_seen_at, p256dh, auth, display_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE user_id = COALESCE(VALUES(user_id), user_id), school_id = COALESCE(VALUES(school_id), school_id), guest_key = COALESCE(VALUES(guest_key), guest_key),
-                p256dh = COALESCE(VALUES(p256dh), p256dh), auth = COALESCE(VALUES(auth), auth), fails = 0, engage_count = 0, last_seen_at = VALUES(last_seen_at)',
-            [$userId, $schoolId, $guestKey, hash('sha256', $endpoint), $endpoint, mb_substr($device, 0, 160), $now, $now, $p256dh, $auth]);
+                p256dh = COALESCE(VALUES(p256dh), p256dh), auth = COALESCE(VALUES(auth), auth), display_name = COALESCE(VALUES(display_name), display_name), fails = 0, engage_count = 0, last_seen_at = VALUES(last_seen_at)',
+            [$userId, $schoolId, $guestKey, hash('sha256', $endpoint), $endpoint, mb_substr($device, 0, 160), $now, $now, $p256dh, $auth, $name]);
     }
 
     public function removeSubscription(?int $userId, ?string $guestKey, string $endpoint): void
@@ -125,6 +126,36 @@ final class Notification extends Model
         } elseif ($guestKey !== null) {
             $this->run('UPDATE ' . $this->table('notifications') . ' SET delivered_at = ? WHERE guest_key = ? AND delivered_at IS NULL', [gmdate('Y-m-d H:i:s'), $guestKey]);
         }
+    }
+
+    /** First name of an account holder, for greetings. */
+    public function firstNameOf(int $userId): ?string
+    {
+        $name = trim((string) $this->scalar('SELECT name FROM ' . $this->table('users') . ' WHERE id = ?', [$userId]));
+        return $name === '' ? null : (string) preg_split('/\s+/', $name)[0];
+    }
+
+    /**
+     * Today's suggested practice series (a real set from the public catalogue). Prefers the person's own
+     * subject; the same seed gives the same set so a day's message never changes underfoot.
+     *
+     * @return array{subject:string, year:int, board:string, total:int}|null
+     */
+    public function dailySet(?string $subject, int $seed): ?array
+    {
+        $sql = 'SELECT s.name AS subject, e.year, t.name AS board, e.total_questions AS total FROM ' . $this->table('exams') . ' e
+            JOIN ' . $this->table('subjects') . ' s ON s.id = e.subject_id JOIN ' . $this->table('exam_types') . ' t ON t.id = e.exam_type_id
+            WHERE e.is_active = 1 AND e.year BETWEEN 2005 AND 2026';
+        $params = [];
+        if ($subject !== null) {
+            $sql .= ' AND LOWER(s.name) = LOWER(?)';
+            $params[] = $subject;
+        }
+        $row = $this->row($sql . ' ORDER BY MOD(e.id * 7919 + ?, 10007) LIMIT 1', [...$params, $seed]);
+        if ($row === null && $subject !== null) {
+            return $this->dailySet(null, $seed);
+        }
+        return $row === null ? null : ['subject' => (string) $row['subject'], 'year' => (int) $row['year'], 'board' => (string) $row['board'], 'total' => (int) $row['total']];
     }
 
     public function purgeOld(): int

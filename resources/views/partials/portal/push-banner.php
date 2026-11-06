@@ -8,7 +8,7 @@ if ($pushKey === '') {
     return;
 }
 ?>
-<section class="card mb-6 hidden items-center gap-4 p-4 sm:p-5" data-push-banner data-push-key="<?= e($pushKey) ?>" data-push-base="<?= e(url('/push')) ?>" aria-label="Phone notifications">
+<section class="card mb-6 hidden items-center gap-4 p-4 sm:p-5" data-push-banner data-push-guest="<?= !empty($pushGuest) ? '1' : '0' ?>" data-push-key="<?= e($pushKey) ?>" data-push-base="<?= e(url('/push')) ?>" aria-label="Phone notifications">
     <span class="icon-tile h-12 w-12 shrink-0 rounded-2xl"><?= icon('bell', 'h-6 w-6') ?></span>
     <div class="min-w-0 flex-1">
         <p class="font-display text-[15px] font-semibold text-ink" data-push-title><?= e($pushTitle) ?></p>

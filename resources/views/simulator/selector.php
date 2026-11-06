@@ -107,7 +107,7 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
     </section>
 
 <?php if (\ExamCore\Services\PushService::publicKey() !== ''): ?>
-    <section class="relative z-10 mx-auto mt-6 hidden max-w-7xl items-center gap-4 rounded-2xl bg-white p-4 shadow-xl ring-1 ring-slate-200/70 sm:p-5 lg:mx-auto" data-push-banner data-push-key="<?= e(\ExamCore\Services\PushService::publicKey()) ?>" data-push-base="<?= e(url('/push')) ?>" aria-label="Phone notifications" style="width:calc(100% - 2rem)">
+    <section class="relative z-10 mx-auto mt-6 hidden max-w-7xl items-center gap-4 rounded-2xl bg-white p-4 shadow-xl ring-1 ring-slate-200/70 sm:p-5 lg:mx-auto" data-push-banner data-push-guest="1" data-push-key="<?= e(\ExamCore\Services\PushService::publicKey()) ?>" data-push-base="<?= e(url('/push')) ?>" aria-label="Phone notifications" style="width:calc(100% - 2rem)">
         <span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-blue-100 text-primary"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span>
         <div class="min-w-0 flex-1">
             <p class="font-display text-[15px] font-bold text-ink" data-push-title>Get a daily practice reminder</p>

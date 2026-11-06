@@ -242,6 +242,7 @@ return static function (Router $router, Container $container): void {
     $router->post('/push/subscribe', [PushController::class, 'subscribe']);
     $router->post('/push/unsubscribe', [PushController::class, 'unsubscribe']);
     $router->post('/push/test', [PushController::class, 'test']);
+    $router->get('/announcements', [PushController::class, 'announcements']);
     $router->get('/push/pending', [PushController::class, 'pending']);
 
     // ---- Student portal ------------------------------------------------------------------
