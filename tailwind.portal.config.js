@@ -4,6 +4,8 @@ module.exports = {
     content: [
         "./resources/views/layouts/portal.php",
         "./resources/views/layouts/auth.php",
+        "./resources/views/layouts/signin.php",
+        "./resources/views/partials/signin-tabs.php",
         "./resources/views/layouts/exam.php",
         "./resources/views/layouts/print.php",
         "./resources/views/layouts/practice.php",

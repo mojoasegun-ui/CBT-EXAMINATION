@@ -62,7 +62,7 @@ final class VerifyController extends PortalController
 
     public function checkForm(Request $request): Response
     {
-        return $this->page($request, 'public/check', ['title' => 'Check a result', 'area' => 'school', 'slug' => (string) $request->query('school', '')], 'layouts/auth');
+        return $this->page($request, 'public/check', ['title' => 'Check a result', 'area' => 'school', 'slug' => (string) $request->query('school', '')], 'layouts/signin');
     }
 
     public function check(Request $request): Response

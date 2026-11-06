@@ -70,7 +70,7 @@ final class AuthController extends PortalController
             'subtitle' => 'For school administrators, teachers and reviewers.',
             'action' => url('/login'),
             'next' => $request->query('next'),
-        ], 'layouts/auth');
+        ], 'layouts/signin');
     }
 
     public function schoolLogin(Request $request): Response

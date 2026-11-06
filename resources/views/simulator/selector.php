@@ -70,7 +70,7 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
         <div class="hero-grid -z-10" aria-hidden="true"></div>
         <div class="hero-bits -z-10" aria-hidden="true"><b>A</b><b>B</b><b>C</b><b>D</b><b>✓</b><b>?</b><b>+</b><b>%</b></div>
         <div class="mx-auto grid max-w-7xl items-center gap-6 px-4 pb-24 pt-9 sm:px-6 sm:pt-14 lg:grid-cols-[1.15fr_.85fr] lg:px-8 lg:pb-28 lg:pt-16">
-            <div class="motion-reveal" data-reveal>
+            <div class="motion-reveal relative z-10" data-reveal>
                 <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-blue-50 backdrop-blur sm:text-sm"><span class="h-2 w-2 rounded-full bg-amber-400"></span> Free practice · no account needed</p>
                 <h1 id="hero-title" class="font-display text-[2rem] font-extrabold leading-[1.1] sm:text-5xl lg:text-6xl">Practice <span class="hero-word" data-rotate="WAEC|NECO|JAMB">WAEC</span> the smart way. <span class="text-amber-300">Free, no login.</span></h1>
                 <p class="mt-4 max-w-xl text-[15px] leading-7 text-blue-50 sm:text-lg">Choose a subject and year, work through one question at a time, and see your score with <span class="font-semibold text-amber-300">explanations</span> when you finish.</p>
@@ -79,7 +79,7 @@ $homeUrl = rtrim((string) $baseUrl, '/') !== '' ? rtrim((string) $baseUrl, '/') 
                     <a href="#how-title" class="inline-flex min-h-14 items-center justify-center gap-3 rounded-2xl border border-white/30 bg-white/10 px-6 text-base font-bold text-white backdrop-blur transition active:scale-[.98] hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h7a3 3 0 0 1 3 3v14a2 2 0 0 0-2-2H2V4ZM22 4h-7a3 3 0 0 0-3 3v14a2 2 0 0 1 2-2h8V4Z"/></svg> How it works</a>
                 </div>
             </div>
-            <div class="relative mx-auto hidden w-full max-w-md lg:block" aria-hidden="true">
+            <div class="hero-art-wrap" aria-hidden="true">
                 <div class="hero-ring"></div><div class="hero-ring hero-ring-2"></div><svg viewBox="0 0 420 360" class="hero-cap w-full drop-shadow-2xl" data-parallax xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <linearGradient id="bkA" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#60a5fa"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient>

@@ -1,14 +1,20 @@
 <?php
 declare(strict_types=1);
 /** Parent result checker. @var string $slug @var array $errors @var array $old */
+$hasError = $errors !== [];
+$mode = 'parent';
 ?>
-<p class="eyebrow">For parents &amp; guardians</p>
-<h1 class="mt-3 font-display text-[32px] font-semibold leading-tight text-ink">Check a result</h1>
-<p class="mt-3 text-[15px] leading-7 text-muted">Enter the school code, your child's admission number and the result code printed on the report card or given by the school.</p>
-<form method="post" action="<?= e(url('/check-result')) ?>" class="mt-8 space-y-5" data-submit-once novalidate>
+<h2 class="si-h">Check Your Child's Result</h2>
+<p class="si-sub">For parents and guardians. Use the school code, admission number and the result code from the report card.</p>
+<?php require __DIR__ . '/../partials/signin-tabs.php'; ?>
+<form method="post" action="<?= e(url('/check-result')) ?>" class="si-form" data-submit-once novalidate>
     <input type="hidden" name="_csrf_token" value="<?= e($csrfToken) ?>">
-    <?= field('school', 'School code', (string) ($old['school'] ?? $slug), $errors, ['placeholder' => 'e.g. kings-college', 'attrs' => ' autocapitalize="none" autocomplete="off"', 'required' => true]) ?>
-    <?= field('admission_no', 'Admission number', (string) ($old['admission_no'] ?? ''), $errors, ['placeholder' => 'e.g. KC/2024/0123', 'attrs' => ' autocapitalize="characters" autocomplete="off"', 'required' => true]) ?>
-    <?= field('code', 'Result code', '', $errors, ['placeholder' => '8 letters and numbers', 'attrs' => ' autocapitalize="characters" autocomplete="off" maxlength="12"', 'required' => true]) ?>
-    <button class="btn btn-primary btn-lg w-full"><?= icon('search') ?><span data-label>Show result</span></button>
+    <label class="si-field"><span class="si-ico"><?= icon('school', 'h-5 w-5') ?></span>
+        <input name="school" required autocomplete="off" autocapitalize="none" spellcheck="false" value="<?= e((string) ($old['school'] ?? $slug)) ?>" placeholder="School code (e.g. kings-college)" aria-label="School code"></label>
+    <label class="si-field<?= $hasError ? ' is-error' : '' ?>"><span class="si-ico"><?= icon('user', 'h-5 w-5') ?></span>
+        <input name="admission_no" required autocomplete="off" autocapitalize="characters" spellcheck="false" value="<?= e((string) ($old['admission_no'] ?? '')) ?>" placeholder="Admission number" aria-label="Admission number"></label>
+    <label class="si-field<?= $hasError ? ' is-error' : '' ?>"><span class="si-ico"><?= icon('key', 'h-5 w-5') ?></span>
+        <input name="code" required autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" placeholder="Result code (8 letters and numbers)" aria-label="Result code"></label>
+    <button type="submit" class="si-btn"><span data-label>Show Result</span><?= icon('arrow-right', 'h-5 w-5') ?></button>
 </form>
+<p class="si-help si-help-2">Student? <a href="<?= e(url('/student/login')) ?>">Sign in here</a></p>

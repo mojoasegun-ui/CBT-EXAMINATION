@@ -105,3 +105,22 @@ body.menu-open::before{content:"";position:fixed;inset:0;z-index:30;background:r
 
 .site-footer,.site-footer p,.site-footer li,.site-footer span{color:inherit}
 .site-footer{color:#e2e8f0}
+
+/* ---- Result page ---- */
+.rm-tab{display:inline-flex;flex:none;align-items:center;gap:.45rem;min-height:2.5rem;padding:0 1rem;border-radius:9999px;border:1px solid #e2e8f0;background:#fff;color:#475569;font-weight:700;font-size:.875rem;transition:all .2s ease}
+.rm-tab[aria-selected=true]{background:#1e40af;border-color:#1e40af;color:#fff;box-shadow:0 8px 18px -8px rgba(30,64,175,.6)}
+.rm-count{display:inline-grid;min-width:1.35rem;height:1.35rem;place-items:center;border-radius:9999px;background:rgba(15,23,42,.08);font-size:.72rem;padding:0 .3rem}
+.rm-tab[aria-selected=true] .rm-count{background:rgba(255,255,255,.25)}
+.rm-rise{animation:rm-rise .6s cubic-bezier(.2,.8,.2,1) both}
+.rm-q{animation:rm-rise .5s cubic-bezier(.2,.8,.2,1) both}
+.rm-q:nth-child(2){animation-delay:.05s}.rm-q:nth-child(3){animation-delay:.1s}.rm-q:nth-child(4){animation-delay:.15s}.rm-q:nth-child(n+5){animation-delay:.2s}
+@keyframes rm-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.rm-rise,.rm-q{animation:none}}
+
+/* Home hero picture: centred and animated behind the text on phones, beside it on desktop. */
+.hero-art-wrap{position:absolute;left:50%;top:46%;z-index:0;width:min(88vw,25rem);translate:-50% -50%;opacity:.42;pointer-events:none}
+.hero-art-wrap .hero-chip{display:none}
+@media (min-width:1024px){
+  .hero-art-wrap{position:relative;left:auto;top:auto;translate:none;z-index:auto;opacity:1;width:100%;max-width:28rem;margin:0 auto;pointer-events:auto}
+  .hero-art-wrap .hero-chip{display:block}
+}

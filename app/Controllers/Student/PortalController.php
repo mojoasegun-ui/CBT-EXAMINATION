@@ -44,7 +44,7 @@ final class PortalController extends BasePortal
             'area' => 'student',
             'title' => 'Student sign-in',
             'schoolCode' => preg_match('/^[a-z0-9-]{1,60}$/', $slug) ? $slug : '',
-        ], 'layouts/auth');
+        ], 'layouts/signin');
     }
 
     /** Short link printed on slips: /s/{school} → sign-in with the school pre-filled. */
