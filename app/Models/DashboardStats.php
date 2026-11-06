@@ -62,14 +62,15 @@ final class DashboardStats extends Model
         return array_reverse($rows); // oldest first for the chart
     }
 
-    /** @return array{avg:?float,top:int,completed:int} over the last 30 days */
+    /** @return array{avg:?float,top:int,completed:int,pass:?float} over the last 30 days */
     public function schoolTotals(int $schoolId, ?int $authorId): array
     {
         $join = $authorId !== null ? ' JOIN ' . $this->table('school_exams') . ' e ON e.id = s.exam_id AND e.created_by = ?' : '';
         $params = array_filter([$authorId, $schoolId, gmdate('Y-m-d H:i:s', time() - 30 * 86400)], static fn ($v): bool => $v !== null);
-        $row = $this->row('SELECT AVG(s.percent) AS avg_p, COUNT(*) AS n, COUNT(DISTINCT CASE WHEN s.percent >= 80 THEN s.student_id END) AS top
+        $row = $this->row('SELECT AVG(s.percent) AS avg_p, COUNT(*) AS n, COUNT(DISTINCT CASE WHEN s.percent >= 80 THEN s.student_id END) AS top, SUM(s.percent >= 50) AS pass_n
             FROM ' . $this->table('exam_sittings') . ' s' . $join . " WHERE s.school_id = ? AND s.status <> 'in_progress' AND s.percent IS NOT NULL AND s.submitted_at >= ?", array_values($params));
-        return ['avg' => $row !== null && $row['avg_p'] !== null ? round((float) $row['avg_p'], 1) : null, 'top' => (int) ($row['top'] ?? 0), 'completed' => (int) ($row['n'] ?? 0)];
+        return ['avg' => $row !== null && $row['avg_p'] !== null ? round((float) $row['avg_p'], 1) : null, 'top' => (int) ($row['top'] ?? 0), 'completed' => (int) ($row['n'] ?? 0),
+            'pass' => (int) ($row['n'] ?? 0) > 0 ? round((int) ($row['pass_n'] ?? 0) / (int) $row['n'] * 100, 1) : null];
     }
 
     /** @return array{upcoming:int,live:int,total:int} exams this person (or the whole school) has scheduled */
@@ -103,5 +104,88 @@ final class DashboardStats extends Model
             JOIN ' . $this->table('school_exams') . " e ON e.id = s.exam_id
             WHERE s.school_id = ? AND s.status = 'in_progress' AND s.deadline_at > ?" . ($authorId !== null ? ' AND e.created_by = ?' : '') . ' ORDER BY s.started_at DESC LIMIT ' . max(1, min(20, $limit)),
             $authorId !== null ? [$schoolId, gmdate('Y-m-d H:i:s'), $authorId] : [$schoolId, gmdate('Y-m-d H:i:s')]);
+    }
+
+    // ---------------------------------------------------------------- Extra panels (school admin / teacher)
+
+    /** @return array{upcoming:int,live:int,past:int,draft:int} */
+    public function examStatus(int $schoolId, ?int $authorId): array
+    {
+        $now = gmdate('Y-m-d H:i:s');
+        $a = $authorId !== null ? ' AND created_by = ?' : '';
+        $q = fn (string $where, array $params): int => (int) $this->scalar('SELECT COUNT(*) FROM ' . $this->table('school_exams') . ' WHERE school_id = ? AND ' . $where . $a, $authorId !== null ? [$schoolId, ...$params, $authorId] : [$schoolId, ...$params]);
+        return [
+            'upcoming' => $q("status = 'published' AND starts_at > ?", [$now]),
+            'live' => $q("status = 'published' AND starts_at <= ? AND ends_at >= ?", [$now, $now]),
+            'past' => $q("(status = 'cancelled' OR (status = 'published' AND ends_at < ?))", [$now]),
+            'draft' => $q("status = 'draft'", []),
+        ];
+    }
+
+    /**
+     * Sittings per day for one school (optionally one author's exams): started, or completed.
+     *
+     * @return list<array{date:string,count:int}>
+     */
+    public function sittingSeries(int $days, int $schoolId, ?int $authorId, string $kind = 'started'): array
+    {
+        $days = max(1, min(60, $days));
+        $col = $kind === 'completed' ? 's.submitted_at' : 's.started_at';
+        $since = gmdate('Y-m-d 00:00:00', strtotime('-' . ($days - 1) . ' days'));
+        $join = $authorId !== null ? ' JOIN ' . $this->table('school_exams') . ' e ON e.id = s.exam_id AND e.created_by = ?' : '';
+        $params = $authorId !== null ? [$authorId, $schoolId, $since] : [$schoolId, $since];
+        $rows = $this->rows("SELECT DATE({$col}) AS d, COUNT(*) AS n FROM " . $this->table('exam_sittings') . " s{$join} WHERE s.school_id = ? AND {$col} >= ? GROUP BY DATE({$col})", $params);
+        $by = array_column($rows, 'n', 'd');
+        $out = [];
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $d = gmdate('Y-m-d', strtotime('-' . $i . ' days'));
+            $out[] = ['date' => $d, 'count' => (int) ($by[$d] ?? 0)];
+        }
+        return $out;
+    }
+
+    /** @return list<array{date:string,count:int}> students enrolled per day */
+    public function enrolledSeries(int $days, ?int $schoolId = null): array
+    {
+        $days = max(1, min(60, $days));
+        $since = gmdate('Y-m-d 00:00:00', strtotime('-' . ($days - 1) . ' days'));
+        $rows = $this->rows('SELECT DATE(created_at) AS d, COUNT(*) AS n FROM ' . $this->table('student_profiles') . ' WHERE created_at >= ?' . ($schoolId !== null ? ' AND school_id = ?' : '') . ' GROUP BY DATE(created_at)',
+            $schoolId !== null ? [$since, $schoolId] : [$since]);
+        $by = array_column($rows, 'n', 'd');
+        $out = [];
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $d = gmdate('Y-m-d', strtotime('-' . $i . ' days'));
+            $out[] = ['date' => $d, 'count' => (int) ($by[$d] ?? 0)];
+        }
+        return $out;
+    }
+
+    public function newStudents(int $schoolId, int $days = 7): int
+    {
+        return (int) $this->scalar('SELECT COUNT(*) FROM ' . $this->table('student_profiles') . ' WHERE school_id = ? AND created_at >= ?', [$schoolId, gmdate('Y-m-d H:i:s', time() - $days * 86400)]);
+    }
+
+    /** @return list<array{name:string,avg:float,taken:int,class_name:?string}> best average over the last 30 days */
+    public function topStudents(int $schoolId, ?int $authorId, int $limit = 5): array
+    {
+        $join = $authorId !== null ? ' JOIN ' . $this->table('school_exams') . ' e ON e.id = s.exam_id AND e.created_by = ?' : '';
+        $params = $authorId !== null ? [$authorId, $schoolId, gmdate('Y-m-d H:i:s', time() - 30 * 86400)] : [$schoolId, gmdate('Y-m-d H:i:s', time() - 30 * 86400)];
+        $rows = $this->rows('SELECT u.name, ROUND(AVG(s.percent), 1) AS avg_p, COUNT(*) AS n, c.name AS class_name FROM ' . $this->table('exam_sittings') . ' s' . $join . '
+            JOIN ' . $this->table('users') . ' u ON u.id = s.student_id LEFT JOIN ' . $this->table('student_profiles') . ' sp ON sp.user_id = s.student_id LEFT JOIN ' . $this->table('school_classes') . " c ON c.id = sp.class_id
+            WHERE s.school_id = ? AND s.status <> 'in_progress' AND s.percent IS NOT NULL AND s.submitted_at >= ? GROUP BY s.student_id, u.name, c.name ORDER BY AVG(s.percent) DESC, COUNT(*) DESC LIMIT " . max(1, min(10, $limit)), $params);
+        return array_map(static fn (array $r): array => ['name' => (string) $r['name'], 'avg' => (float) $r['avg_p'], 'taken' => (int) $r['n'], 'class_name' => $r['class_name']], $rows);
+    }
+
+    /** @return array{with:int,total:int} students that have a photo (used for exam identity checks) */
+    public function photoCoverage(int $schoolId): array
+    {
+        $row = $this->row('SELECT COUNT(*) AS total, SUM(photo_path IS NOT NULL AND photo_path <> \'\') AS withp FROM ' . $this->table('student_profiles') . " WHERE school_id = ? AND status = 'active'", [$schoolId]);
+        return ['with' => (int) ($row['withp'] ?? 0), 'total' => (int) ($row['total'] ?? 0)];
+    }
+
+    /** @return int how many people in this school turned phone alerts on */
+    public function alertSubscribers(int $schoolId): int
+    {
+        return (int) $this->scalar('SELECT COUNT(DISTINCT user_id) FROM ' . $this->table('push_subscriptions') . ' WHERE school_id = ? AND user_id IS NOT NULL', [$schoolId]);
     }
 }

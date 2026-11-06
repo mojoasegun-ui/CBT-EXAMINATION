@@ -62,6 +62,7 @@ final class ConsoleController extends PortalController
             'staff' => ($byRole['school_admin'] ?? 0) + ($byRole['teacher'] ?? 0) + ($byRole['reviewer'] ?? 0),
             'attemptSeries' => $series,
             'sittingSeries' => $this->stats->sittingsDaily(14),
+            'enrolledSeries' => $this->stats->enrolledSeries(14),
             'live' => $this->stats->liveSittings(6),
             'liveCount' => $this->stats->liveCount(),
             'bankCount' => $this->stats->bankCount(),

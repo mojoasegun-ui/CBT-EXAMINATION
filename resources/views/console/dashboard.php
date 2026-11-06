@@ -70,6 +70,7 @@ $initials = static fn (string $name): string => strtoupper(mb_substr(trim($name)
         $lines = [
             ['label' => 'Practice attempts', 'color' => '#2563eb', 'values' => array_column($attemptSeries, 'count')],
             ['label' => 'School exams', 'color' => '#10b981', 'values' => array_column($sittingSeries, 'count')],
+            ['label' => 'New students', 'color' => '#f59e0b', 'values' => array_column($enrolledSeries, 'count')],
         ];
         $chartLabel = 'Practice attempts and school exams per day, last 14 days';
         require __DIR__ . '/../partials/portal/line-chart.php';
@@ -82,6 +83,7 @@ $initials = static fn (string $name): string => strtoupper(mb_substr(trim($name)
             <div class="pd-empty"><span class="ico"><?= icon('clock', 'h-6 w-6') ?></span><b>No exam is running right now</b><span>When students write a school exam, they show up here live.</span></div>
         <?php else: ?>
             <div class="pd-table">
+                <div class="pd-row pd-th"><span></span><span>Student</span><span class="col3">Exam</span><span>Time</span></div>
                 <?php foreach ($live as $row): $left = max(0, strtotime((string) $row['deadline_at'] . ' UTC') - time()); ?>
                     <div class="pd-row">
                         <span class="pd-av"><?= e($initials((string) $row['student_name'])) ?></span>

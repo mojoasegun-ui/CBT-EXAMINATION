@@ -46,6 +46,15 @@ for ($k = 0; $k < $count; $k++) {
     $ticks[] = $labels[(int) round($k * ($n - 1) / max(1, $count - 1))] ?? '';
 }
 $gid = 'lc' . $chartSeq;
+$bubbles = [];
+foreach ($lines as $bi => $bl) {
+    $vals = array_values($bl['values']);
+    $last = $vals === [] ? 0 : (float) end($vals);
+    $pos = (int) round((($pad + min(1.0, max(0.0, $last / $top)) * ($H - 2 * $pad)) / $H * 100) / 4) * 4;
+    if ($last > 0) {
+        $bubbles[] = [$bi, $pos, rtrim(rtrim(number_format($last, 1), '0'), '.') . $chartUnit];
+    }
+}
 ?>
 <?php if (count($lines) > 1): ?>
     <div class="pd-legend"><?php foreach ($lines as $l): ?><span><svg class="pd-dot" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="5" fill="<?= e($l['color']) ?>"/></svg><?= e($l['label']) ?></span><?php endforeach; ?></div>
@@ -60,5 +69,6 @@ $gid = 'lc' . $chartSeq;
         <?php endif; ?>
         <?php foreach ($lines as $l): ?><path class="pd-line" d="<?= $path($l['values']) ?>" stroke="<?= e($l['color']) ?>"/><?php endforeach; ?>
     </svg>
+    <?php foreach ($bubbles as [$bi, $pos, $text]): ?><span class="pd-bubble b<?= $bi ?> at-<?= $pos ?>" aria-hidden="true"><?= e($text) ?></span><?php endforeach; ?>
     <div class="x" aria-hidden="true"><?php foreach ($ticks as $t): ?><span><?= e($t) ?></span><?php endforeach; ?></div>
 </div>

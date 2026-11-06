@@ -51,6 +51,7 @@ final class DashboardController extends SchoolController
         $teacherCount = ($staff['teacher'] ?? 0);
         $isAdmin = $this->guard->role() === User::ROLE_SCHOOL_ADMIN;
         $authorId = $isAdmin ? null : (int) $this->guard->id();
+        $studentsByClass = array_column(array_map(static fn (array $c): array => ['id' => (int) $c['id'], 'n' => (int) $c['student_count']], $classes), 'n', 'id');
 
         return $this->page($request, 'school/dashboard', $this->base('Dashboard') + [
             'isAdmin' => $this->guard->role() === User::ROLE_SCHOOL_ADMIN,
@@ -84,6 +85,16 @@ final class DashboardController extends SchoolController
             'performance' => $this->dash->performance($schoolId, $authorId, 8),
             'live' => $this->dash->schoolLive($schoolId, $authorId, 4),
             'myStudents' => $isAdmin ? $activeStudents : $this->dash->teacherStudents($schoolId, (int) $this->guard->id()),
+            'examStatus' => $this->dash->examStatus($schoolId, $authorId),
+            'seriesStarted' => $this->dash->sittingSeries(14, $schoolId, $authorId, 'started'),
+            'seriesDone' => $this->dash->sittingSeries(14, $schoolId, $authorId, 'completed'),
+            'seriesEnrolled' => $this->dash->enrolledSeries(14, $schoolId),
+            'upcoming' => array_slice($this->container->get(\ExamCore\Models\SchoolExam::class)->list($schoolId, 'upcoming', $authorId), 0, 4),
+            'topStudents' => $this->dash->topStudents($schoolId, $authorId, 5),
+            'photo' => $this->dash->photoCoverage($schoolId),
+            'newStudents' => $this->dash->newStudents($schoolId, 7),
+            'alerts' => $this->dash->alertSubscribers($schoolId),
+            'myClasses' => $isAdmin ? [] : array_map(static fn (array $a): array => $a + ['students' => $studentsByClass[(int) $a['class_id']] ?? 0], $this->subjects->forTeacher($schoolId, (int) $this->guard->id())),
         ]);
     }
 
